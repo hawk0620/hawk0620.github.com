@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2014-07-27T13:37:46+08:00</updated>
+  <updated>2014-07-27T16:37:53+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,5 +12,90 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[NSURLSession的日常]]></title>
+    <link href="http://hawk0620.github.io/blog/2014/07/27/daily-nsurlsession/"/>
+    <updated>2014-07-27T13:42:05+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2014/07/27/daily-nsurlsession</id>
+    <content type="html"><![CDATA[<p> 在使用<code>NSURLSessionTaskDelegate</code>的时候，一开始并没有进入<code>URLSession:task:didCompleteWithError:</code>回调，阅读苹果给出的文档之后，成功解决。</p>
+
+<h3>NSURLSession简介</h3>
+
+<p> <code>NSURLSession</code>是iOS7带来的诸多新特性之一，旨在替换<code>NSURLConnection</code>。<code>NSURLSession</code>的使用非常简单，步骤如下：</p>
+
+<p> 1.创建并配置<code>NSURLSessionConfiguration</code>;</p>
+
+<p> 2.通过步骤一的configuration创建<code>NSURLSession</code>;</p>
+
+<p> 3.创建相应sessionTask(data、upload or download);</p>
+
+<p> 4.调用<code>resume</code>启动task。</p>
+
+<p> 给出一些例子代码：</p>
+
+<pre><code>NSData *imageData = UIImageJPEGRepresentation([UIImage imageNamed:@"panda.jpg"], 0.6);
+
+NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+config.HTTPMaximumConnectionsPerHost = 1;
+ [config setHTTPAdditionalHeaders:@{@"example_appkey": @"jfdeh79685eun"}];
+
+NSURLSession *upLoadSession = [NSURLSession sessionWithConfiguration:config];
+NSURL *url = [NSURL URLWithString:@"http://example.com"];
+NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
+[request setHTTPMethod:@"PUT"];
+
+NSURLSessionUploadTask *uploadTask = [upLoadSession uploadTaskWithRequest:request fromData:imageData completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
+    if (!error  &amp;&amp; httpResp.statusCode == 200) {
+        //handle...
+    }
+}];
+
+[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+[_uploadTask resume];
+</code></pre>
+
+<h2>使用NSURLSessionTaskDelegate</h2>
+
+<p> 实现<code>&lt;NSURLSessionTaskDelegate&gt;</code>，该委托提供出了能计算上传进度的方法，代码如下：</p>
+
+<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesSent totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend
+{
+    NSLog(@"progress:%f",(double)totalBytesSent / (double)totalBytesExpectedToSend);
+}
+</code></pre>
+
+<p> 当然还有sessionTask完成时的回调：</p>
+
+<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    });
+    if (!error) {
+        //handle..
+    } else {
+        // Alert for error
+    }
+}
+</code></pre>
+
+<p> 但是该委托方法没有被调用。苹果文档指出，如果使用自定义的委托来获取数据，那么以下方法必须被实现：</p>
+
+<p> <code>URLSession:dataTask:didReceiveData:</code> 一点一点地从你发出地请求中取回数据；
+ <code>URLSession:task:didCompleteWithError:</code> 数据被完全接收。</p>
+
+<p> 由此可以看出，还需要实现<code>&lt;NSURLSessionDataDelegate&gt;</code>：</p>
+
+<pre><code>-(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data
+{
+
+}
+</code></pre>
+
+<p> 至此，成功进入<code>URLSession:task:didCompleteWithError:</code>。</p>
+]]></content>
+  </entry>
   
 </feed>
