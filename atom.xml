@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[来自某码农的日常]]></title>
+  <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2014-07-19T11:35:33+08:00</updated>
+  <updated>2014-07-27T13:37:46+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
