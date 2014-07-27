@@ -41,12 +41,18 @@ categories:
     [_uploadTask resume];
  
 ## 使用NSURLSessionTaskDelegate
+ 修改创建uploadSession方法：
+    NSURLSession *upLoadSession = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
+
  实现`<NSURLSessionTaskDelegate>`，该委托提供出了能计算上传进度的方法，代码如下：
 
     - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesSent totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend
     {
         NSLog(@"progress:%f",(double)totalBytesSent / (double)totalBytesExpectedToSend);
     }
+ 
+ 将创建uploadTask方法更改为:
+    NSURLSessionUploadTask *uploadTask = [upLoadSession uploadTaskWithRequest:request fromData:imageData];
 
  当然还有sessionTask完成时的回调：
 
