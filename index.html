@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="在使用NSURLSessionTaskDelegate的时候，一开始并没有进入URLSession:task:didCompleteWithError:回调，阅读苹果给出的文档之后，成功解决。 NSURLSession简介 NSURLSession是iOS7带来的诸多新特性之一， &hellip;">
+  <meta name="description" content="当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过GCD来帮助我们实现。 dispatch_semaphore简介 dispatch_semaphore_create创建一个带初始值的semaphore； &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,60 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/20/dispatch-semaphore/">Dispatch_semaphore</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
+
+<h3>dispatch_semaphore简介</h3>
+
+<p> <code>dispatch_semaphore_create</code>创建一个带初始值的semaphore；
+ <code>dispatch_semaphore_signal</code>增加semaphore的计数，并发送semaphore信号；
+ <code>dispatch_semaphore_wait</code>减少semaphore的计数，并等待semaphore信号的到达。</p>
+
+<p> 示例代码：</p>
+
+<pre><code>dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+
+[self singleBlock:^(id param){
+    // your codes...
+    dispatch_semaphore_signal(sem);
+}];
+
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -199,6 +253,10 @@ NSURLSessionUploadTask *uploadTask = [upLoadSession uploadTaskWithRequest:reques
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/09/20/dispatch-semaphore/">Dispatch_semaphore</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/07/27/daily-nsurlsession/">NSURLSession的日常</a>

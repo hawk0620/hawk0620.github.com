@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - 陈浩的技术博客</title>
+  <title>Dispatch_semaphore - 陈浩的技术博客</title>
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content=" Blog Archive 2014 Dispatch_semaphore
-Sep 20 2014 NSURLSession的日常
-Jul 27 2014 Recent Posts Dispatch_semaphore NSURLSession的日常 ">
+  <meta name="description" content="当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过GCD来帮助我们实现。 dispatch_semaphore简介 dispatch_semaphore_create创建一个带初始值的semaphore； &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +18,7 @@ Jul 27 2014 Recent Posts Dispatch_semaphore NSURLSession的日常 ">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hawk0620.github.io/blog/archives">
+  <link rel="canonical" href="http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
@@ -66,41 +64,94 @@ Jul 27 2014 Recent Posts Dispatch_semaphore NSURLSession的日常 ">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">Dispatch_semaphore</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
+<div class="entry-content"><p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
 
-  
-  <h2>2014</h2>
+<h3>dispatch_semaphore简介</h3>
 
-<article>
-  
-<h1><a href="/blog/2014/09/20/dispatch-semaphore/">Dispatch_semaphore</a></h1>
-<time datetime="2014-09-20T19:36:00+08:00" pubdate><span class='month'>Sep</span> <span class='day'>20</span> <span class='year'>2014</span></time>
+<p> <code>dispatch_semaphore_create</code>创建一个带初始值的semaphore；
+ <code>dispatch_semaphore_signal</code>增加semaphore的计数，并发送semaphore信号；
+ <code>dispatch_semaphore_wait</code>减少semaphore的计数，并等待semaphore信号的到达。</p>
 
+<p> 示例代码：</p>
 
-</article>
+<pre><code>dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 
+[self singleBlock:^(id param){
+    // your codes...
+    dispatch_semaphore_signal(sem);
+}];
 
-
-<article>
-  
-<h1><a href="/blog/2014/07/27/daily-nsurlsession/">NSURLSession的日常</a></h1>
-<time datetime="2014-07-27T13:42:05+08:00" pubdate><span class='month'>Jul</span> <span class='day'>27</span> <span class='year'>2014</span></time>
-
-
-</article>
-
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+</code></pre>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Hawk0620</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/07/27/daily-nsurlsession/" title="Previous Post: NSURLSession的日常">&laquo; NSURLSession的日常</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>

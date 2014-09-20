@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2014-07-27T18:08:57+08:00</updated>
+  <updated>2014-09-20T21:25:25+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,33 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Dispatch_semaphore]]></title>
+    <link href="http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore/"/>
+    <updated>2014-09-20T19:36:00+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore</id>
+    <content type="html"><![CDATA[<p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
+
+<h3>dispatch_semaphore简介</h3>
+
+<p> <code>dispatch_semaphore_create</code>创建一个带初始值的semaphore；
+ <code>dispatch_semaphore_signal</code>增加semaphore的计数，并发送semaphore信号；
+ <code>dispatch_semaphore_wait</code>减少semaphore的计数，并等待semaphore信号的到达。</p>
+
+<p> 示例代码：</p>
+
+<pre><code>dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+
+[self singleBlock:^(id param){
+    // your codes...
+    dispatch_semaphore_signal(sem);
+}];
+
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[NSURLSession的日常]]></title>
