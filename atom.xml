@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2014-09-20T21:25:25+08:00</updated>
+  <updated>2014-09-20T21:29:09+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Dispatch_semaphore]]></title>
+    <title type="html"><![CDATA[GCD(semaphore)的日常]]></title>
     <link href="http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore/"/>
     <updated>2014-09-20T19:36:00+08:00</updated>
     <id>http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore</id>
