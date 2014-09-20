@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "dispatch_semaphore"
+title: "GCD(semaphore)的日常"
 date: 2014-09-20 19:36:00 +0800
 comments: true
 categories: 
