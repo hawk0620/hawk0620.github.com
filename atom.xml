@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2014-09-20T21:56:09+08:00</updated>
+  <updated>2015-06-02T10:43:41+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,164 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[iOS 线程同步: @synchronized指令]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/"/>
+    <updated>2015-06-02T07:59:59+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi</id>
+    <content type="html"><![CDATA[<p> 在之前的一个app中，因为对多线程同步的处理不够好，在某些极端情况下app会发生crash。本文简单介绍一下如何使用<code>@synchronized</code>指令来实现线程安全。苹果文档中对<code>@synchronized</code>指令的说明是：</p>
+
+<p>1.<code>@synchronized</code>指令是Objective-C代码中快捷创建互斥锁的一种方式；</p>
+
+<p>2.<code>@synchronized</code>指令像任何其他的互斥锁一样，防止同一时间不同的线程获取相同的锁。</p>
+
+<p><code>@synchronized</code>指令的使用很简单，只需要传一个参数即可：</p>
+
+<pre><code>@synchronized(key) { 
+    // thread-safe code goes here 
+}
+</code></pre>
+
+<p>一个简单的例子：</p>
+
+<p>定义一个全局的数组变量</p>
+
+<pre><code>NSMutableArray *array;
+</code></pre>
+
+<p>初始化该数组</p>
+
+<pre><code>array = [NSMutableArray arrayWithCapacity:5];
+for (int i = 0; i &lt; 5; i++) {
+    [array addObject:[NSString stringWithFormat:@"array-%i", i]];
+}
+</code></pre>
+
+<p>创建更新数组的方法</p>
+
+<pre><code>- (void)updateArray:(NSString *)value {
+
+    for (int j = 0; j &lt; array.count; j++) {
+
+        NSString *currentObject = [array objectAtIndex:j];
+        [array replaceObjectAtIndex:j withObject:[currentObject stringByAppendingFormat:@"-%@", value]];
+
+        NSLog(@"%@", [array objectAtIndex:j]);
+    }
+}
+</code></pre>
+
+<p>在不同的线程中调用修改数组的方法</p>
+
+<pre><code>NSString *bla = @"bla";
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [self updateArray:bla];
+});
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [self updateArray:bla];
+}); 
+</code></pre>
+
+<p>得到如下结果</p>
+
+<pre><code>array-0-bla
+array-0-bla
+array-1-bla
+array-1-bla-bla
+array-2-bla-bla
+array-2-bla
+array-3-bla
+array-3-bla-bla
+array-4-bla
+array-4-bla-bla
+</code></pre>
+
+<p>显而易见，两个线程在争夺资源，当两个线程彼此作用时可能会导致app的crash。下面，修改一下更新数组的方法：</p>
+
+<pre><code>- (void)updateArray:(NSString *)value {
+
+    @synchronized (value) {
+        for (int j = 0; j &lt; array.count; j++) {
+
+            NSString *currentObject = [array objectAtIndex:j];
+            [array replaceObjectAtIndex:j withObject:[currentObject stringByAppendingFormat:@"-%@", value]];
+
+            NSLog(@"%@", [array objectAtIndex:j]);
+        }
+    }
+}
+</code></pre>
+
+<p>看看结果：</p>
+
+<pre><code>array-0-bla
+array-1-bla
+array-2-bla
+array-3-bla
+array-4-bla
+array-0-bla-bla
+array-1-bla-bla
+array-2-bla-bla
+array-3-bla-bla
+array-4-bla-bla
+</code></pre>
+
+<p>这下感觉醒目多了～原因就是<code>@synchronized</code>指令的代码块暂停了其中一个线程，允许另一个线程访问代码块，一旦另一个线程完成工作，就取消暂停。</p>
+
+<p>注意了，如果你使用相同的对象作为<code>@synchronized</code>的key，那么线程将会被暂停（正如刚才所见）。假如使用不同的对象作为<code>@synchronized</code>的key：</p>
+
+<pre><code>NSString *bla = @"bla";
+NSString *ola = @"ola";
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [self updateArray:bla];
+});
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [self updateArray:ola];
+});
+</code></pre>
+
+<p>再看看结果：</p>
+
+<pre><code>array-0-bla
+array-0-ola
+array-1-bla
+array-1-bla-ola
+array-2-bla
+array-2-bla-ola
+array-3-bla
+array-3-bla-ola
+array-4-bla
+array-4-bla-ola
+</code></pre>
+
+<p>像这种出现多个key的情况，使用</p>
+
+<pre><code>@synchronized (array) { 
+    ...
+</code></pre>
+
+<p>替换</p>
+
+<pre><code>@synchronized (value) { 
+    ...
+</code></pre>
+
+<p>这下妥妥了：</p>
+
+<pre><code>array-0-bla
+array-1-bla
+array-2-bla
+array-3-bla
+array-4-bla
+array-0-bla-ola
+array-1-bla-ola
+array-2-bla-ola
+array-3-bla-ola
+array-4-bla-ola
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[GCD(semaphore)的日常]]></title>
