@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-06-02T10:43:41+08:00</updated>
+  <updated>2015-08-30T11:59:28+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,175 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[自定义NavigationController转场动画]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/08/30/navigation-transition/"/>
+    <updated>2015-08-30T08:29:21+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/08/30/navigation-transition</id>
+    <content type="html"><![CDATA[<p> 这篇文章简单介绍下如何自定义UINavigationController转场动画，其大致的思路是:</p>
+
+<p> 1、实现<UINavigationControllerDelegate>协议的方法:</p>
+
+<pre><code>- (id&lt;UIViewControllerAnimatedTransitioning&gt;)navigationController:(UINavigationController *)navigationController
+                              animationControllerForOperation:(UINavigationControllerOperation)operation
+                                           fromViewController:(UIViewController *)fromVC
+                                             toViewController:(UIViewController *)toVC {
+    if (fromVC == self &amp;&amp; [toVC isKindOfClass:[YourDestinationController class]]) {
+        return [[TransitionAnimator alloc] init];
+    }
+    else {
+        return nil;
+    }
+}
+</code></pre>
+
+<p>2、别忘了在viewDidAppear和viewWillDisappear方法中对delegate属性进行赋值：</p>
+
+<pre><code>- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    self.navigationController.delegate = self;
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+
+    if (self.navigationController.delegate == self) {
+        self.navigationController.delegate = nil;
+    }
+}
+</code></pre>
+
+<p>3、然后创建一个名为TransitionAnimator的NSObject子类，让其实现<UIViewControllerAnimatedTransitioning>协议：</p>
+
+<pre><code>- (NSTimeInterval)transitionDuration:(id&lt;UIViewControllerContextTransitioning&gt;)transitionContext {
+    return duration;
+}
+- (void)animateTransition:(id&lt;UIViewControllerContextTransitioning&gt;)transitionContext {
+
+}
+</code></pre>
+
+<p> 4、简单介绍下<code>animateTransition:</code>：</p>
+
+<pre><code>// 返回当前ViewController
+UIViewController *fromVC = [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
+// 返回目标ViewController
+UIViewController *toViewController = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+// 返回容器视图
+UIView *containerView = [transitionContext containerView];
+// 返回动画时长
+NSTimeInterval duration = [self transitionDuration:transitionContext];
+// toViewController.view添加在containerView上
+[containerView addSubview:toViewController.view];
+</code></pre>
+
+<p> 5、了解了这些基础知识之后，就可以自定义转场动画了，可以使用UIView类方法<code>animateWithDuration</code>，或者Core Animation添加动画:</p>
+
+<pre><code>// 可以对view的alpha值，frame等属性进行
+[UIView animateWithDuration:duration animations:^{
+
+} completion:^(BOOL finished) {
+
+    // 动画结束后别忘了告诉我们已经完成了～
+    [transitionContext completeTransition:!transitionContext.transitionWasCancelled];
+}];
+</code></pre>
+
+<p> 或者</p>
+
+<pre><code>// 实现一个类似ping的转场
+// -----动画开始------
+UIBezierPath *circleMaskPathInitial = [UIBezierPath bezierPathWithOvalInRect:rect];
+CGPoint extremePoint = CGPointMake(CGRectGetMidX(rect) - 0, CGRectGetMidY(rect) - CGRectGetHeight(toViewController.view.bounds));
+CGFloat radius = sqrt((extremePoint.x*extremePoint.x) + (extremePoint.y*extremePoint.y));
+UIBezierPath *circleMaskPathFinal = [UIBezierPath bezierPathWithOvalInRect:CGRectInset(rect, -radius, -radius)];
+
+CAShapeLayer *maskLayer = [CAShapeLayer layer];
+maskLayer.path = circleMaskPathFinal.CGPath;
+toViewController.view.layer.mask = maskLayer;
+
+CABasicAnimation *maskLayerAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
+maskLayerAnimation.fromValue = (__bridge id)(circleMaskPathInitial.CGPath);
+maskLayerAnimation.toValue = (__bridge id)(circleMaskPathFinal.CGPath);
+maskLayerAnimation.duration = duration;
+maskLayerAnimation.delegate = self;
+[maskLayer addAnimation:maskLayerAnimation forKey:@"path"];
+// -----动画结束------
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    // 别忘了
+    [self.transitionContext completeTransition:!transitionContext.transitionWasCancelled];
+    [self.transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey].view.layer.mask = nil;
+}
+</code></pre>
+
+<p> <img src="http://cdn4.raywenderlich.com/wp-content/uploads/2014/10/circle-interactive.gif" alt="" /></p>
+
+<p> 虽然好像大致完成了自定义转场动画，但好像还是少了点什么～如果能在<code>popViewControllerAnimated</code>加上手势是不是更棒呢！</p>
+
+<p> 先添加<code>interactivePopTransition</code>属性：</p>
+
+<pre><code>@property (nonatomic, strong) UIPercentDrivenInteractiveTransition *interactivePopTransition;
+</code></pre>
+
+<p> 再实现<code>UINavigationControllerDelegate</code>另一个协议方法：</p>
+
+<pre><code>- (id&lt;UIViewControllerInteractiveTransitioning&gt;)navigationController:(UINavigationController *)navigationController
+                     interactionControllerForAnimationController:(id&lt;UIViewControllerAnimatedTransitioning&gt;)animationController {
+    // Check if this is for our custom transition
+    if ([animationController isKindOfClass:[YourCustomPopAnimator class]]) {
+        return self.interactivePopTransition;
+    }
+    else {
+        return nil;
+    }
+}
+</code></pre>
+
+<p>在<code>viewDidLoad</code>中添加手势：</p>
+
+<pre><code>UIScreenEdgePanGestureRecognizer *popRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePopRecognizer:)];
+popRecognizer.edges = UIRectEdgeLeft;
+[self.view addGestureRecognizer:popRecognizer];
+</code></pre>
+
+<p>并实现手势方法：</p>
+
+<pre><code>- (void)handlePopRecognizer:(UIScreenEdgePanGestureRecognizer*)recognizer {
+    CGFloat progress = [recognizer translationInView:self.view].x / (self.view.bounds.size.width * 1.0);
+    progress = MIN(1.0, MAX(0.0, progress));
+
+    if (recognizer.state == UIGestureRecognizerStateBegan) {
+        // Create a interactive transition and pop the view controller
+        self.interactivePopTransition = [[UIPercentDrivenInteractiveTransition alloc] init];
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+    else if (recognizer.state == UIGestureRecognizerStateChanged) {
+        // Update the interactive transition's progress
+        [self.interactivePopTransition updateInteractiveTransition:progress];
+    }
+    else if (recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled) {
+        // Finish or cancel the interactive transition
+        if (progress &gt; 0.5) {
+            [self.interactivePopTransition finishInteractiveTransition];
+        }
+        else {
+            [self.interactivePopTransition cancelInteractiveTransition];
+        }
+
+        self.interactivePopTransition = nil;
+    }
+
+}
+</code></pre>
+
+<p>最后推荐两篇更详细的教程：</p>
+
+<p>1、<a href="http://dativestudios.com/blog/2013/09/29/interactive-transitions/">interactive-transitions</a>
+2、<a href="http://www.raywenderlich.com/86521/how-to-make-a-view-controller-transition-animation-like-in-the-ping-app">实现ping转场动画</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[iOS 线程同步: @synchronized指令]]></title>
