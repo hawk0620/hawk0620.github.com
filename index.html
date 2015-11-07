@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="这篇文章简单介绍下如何自定义UINavigationController转场动画，其大致的思路是: 1、实现协议的方法: - (id&lt;UIViewControllerAnimatedTransitioning&gt;)navigationController:( &hellip;">
+  <meta name="description" content="&lt;!&mdash;more&mdash;> 最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。 首先我使用CABasicAnimation，在按钮的线条滑到下方终点时，通过动画完成的delegate方法: - (void)animationDidStop:( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,6 +71,57 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/11/07/player-button/">Player-button</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-07T19:42:48+08:00" pubdate data-updated="true">Nov 7<sup>th</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&lt;!&mdash;more&mdash;></p>
+
+<p><img src="http://7xkwuq.com1.z0.glb.clouddn.com/player_button.gif" alt="alt tag" /></p>
+
+<p>最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。</p>
+
+<p>首先我使用<code>CABasicAnimation</code>，在按钮的线条滑到下方终点时，通过动画完成的<code>delegate</code>方法:</p>
+
+<pre><code>- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+</code></pre>
+
+<p>让线条再到达上方的终点，并以此循环，最终实现线条一上一下的效果。但是在实际中，通过反复给<code>layer</code>添加动画，线条的速率得不到保证，最终会出现线条移动错乱的问题。
+在我陷入困苦之后，<code>CAKeyFrameAnimation</code>映入眼帘，我通过帧动画，把之前线条移到下方终点和上方终点的方法进行优化，帧动画的第一个位置是当前初始位置，其次是下方终点，上方终点，再是初始位置，并为每一帧动画计算了时间。通过帧动画实现了我的需求：）</p>
+
+<p>源码我已经放到了Github上面:
+<a href="https://github.com/hawk0620/ZPPlayerButton">https://github.com/hawk0620/ZPPlayerButton</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/08/30/navigation-transition/">自定义NavigationController转场动画</a></h1>
     
     
@@ -94,169 +145,12 @@
   </header>
 
 
-  <div class="entry-content"><p> 这篇文章简单介绍下如何自定义UINavigationController转场动画，其大致的思路是:</p>
-
-<p> 1、实现<UINavigationControllerDelegate>协议的方法:</p>
-
-<pre><code>- (id&lt;UIViewControllerAnimatedTransitioning&gt;)navigationController:(UINavigationController *)navigationController
-                              animationControllerForOperation:(UINavigationControllerOperation)operation
-                                           fromViewController:(UIViewController *)fromVC
-                                             toViewController:(UIViewController *)toVC {
-    if (fromVC == self &amp;&amp; [toVC isKindOfClass:[YourDestinationController class]]) {
-        return [[TransitionAnimator alloc] init];
-    }
-    else {
-        return nil;
-    }
-}
-</code></pre>
-
-<p>2、别忘了在viewDidAppear和viewWillDisappear方法中对delegate属性进行赋值：</p>
-
-<pre><code>- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    self.navigationController.delegate = self;
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-
-    if (self.navigationController.delegate == self) {
-        self.navigationController.delegate = nil;
-    }
-}
-</code></pre>
-
-<p>3、然后创建一个名为TransitionAnimator的NSObject子类，让其实现<UIViewControllerAnimatedTransitioning>协议：</p>
-
-<pre><code>- (NSTimeInterval)transitionDuration:(id&lt;UIViewControllerContextTransitioning&gt;)transitionContext {
-    return duration;
-}
-- (void)animateTransition:(id&lt;UIViewControllerContextTransitioning&gt;)transitionContext {
-
-}
-</code></pre>
-
-<p> 4、简单介绍下<code>animateTransition:</code>：</p>
-
-<pre><code>// 返回当前ViewController
-UIViewController *fromVC = [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
-// 返回目标ViewController
-UIViewController *toViewController = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
-// 返回容器视图
-UIView *containerView = [transitionContext containerView];
-// 返回动画时长
-NSTimeInterval duration = [self transitionDuration:transitionContext];
-// toViewController.view添加在containerView上
-[containerView addSubview:toViewController.view];
-</code></pre>
-
-<p> 5、了解了这些基础知识之后，就可以自定义转场动画了，可以使用UIView类方法<code>animateWithDuration</code>，或者Core Animation添加动画:</p>
-
-<pre><code>// 可以对view的alpha值，frame等属性进行
-[UIView animateWithDuration:duration animations:^{
-
-} completion:^(BOOL finished) {
-
-    // 动画结束后别忘了告诉我们已经完成了～
-    [transitionContext completeTransition:!transitionContext.transitionWasCancelled];
-}];
-</code></pre>
-
-<p> 或者</p>
-
-<pre><code>// 实现一个类似ping的转场
-// -----动画开始------
-UIBezierPath *circleMaskPathInitial = [UIBezierPath bezierPathWithOvalInRect:rect];
-CGPoint extremePoint = CGPointMake(CGRectGetMidX(rect) - 0, CGRectGetMidY(rect) - CGRectGetHeight(toViewController.view.bounds));
-CGFloat radius = sqrt((extremePoint.x*extremePoint.x) + (extremePoint.y*extremePoint.y));
-UIBezierPath *circleMaskPathFinal = [UIBezierPath bezierPathWithOvalInRect:CGRectInset(rect, -radius, -radius)];
-
-CAShapeLayer *maskLayer = [CAShapeLayer layer];
-maskLayer.path = circleMaskPathFinal.CGPath;
-toViewController.view.layer.mask = maskLayer;
-
-CABasicAnimation *maskLayerAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
-maskLayerAnimation.fromValue = (__bridge id)(circleMaskPathInitial.CGPath);
-maskLayerAnimation.toValue = (__bridge id)(circleMaskPathFinal.CGPath);
-maskLayerAnimation.duration = duration;
-maskLayerAnimation.delegate = self;
-[maskLayer addAnimation:maskLayerAnimation forKey:@"path"];
-// -----动画结束------
-
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
-    // 别忘了
-    [self.transitionContext completeTransition:!transitionContext.transitionWasCancelled];
-    [self.transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey].view.layer.mask = nil;
-}
-</code></pre>
-
-<p> <img src="http://cdn4.raywenderlich.com/wp-content/uploads/2014/10/circle-interactive.gif" alt="" /></p>
-
-<p> 虽然好像大致完成了自定义转场动画，但好像还是少了点什么～如果能在<code>popViewControllerAnimated</code>加上手势是不是更棒呢！</p>
-
-<p> 先添加<code>interactivePopTransition</code>属性：</p>
-
-<pre><code>@property (nonatomic, strong) UIPercentDrivenInteractiveTransition *interactivePopTransition;
-</code></pre>
-
-<p> 再实现<code>UINavigationControllerDelegate</code>另一个协议方法：</p>
-
-<pre><code>- (id&lt;UIViewControllerInteractiveTransitioning&gt;)navigationController:(UINavigationController *)navigationController
-                     interactionControllerForAnimationController:(id&lt;UIViewControllerAnimatedTransitioning&gt;)animationController {
-    // Check if this is for our custom transition
-    if ([animationController isKindOfClass:[YourCustomPopAnimator class]]) {
-        return self.interactivePopTransition;
-    }
-    else {
-        return nil;
-    }
-}
-</code></pre>
-
-<p>在<code>viewDidLoad</code>中添加手势：</p>
-
-<pre><code>UIScreenEdgePanGestureRecognizer *popRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePopRecognizer:)];
-popRecognizer.edges = UIRectEdgeLeft;
-[self.view addGestureRecognizer:popRecognizer];
-</code></pre>
-
-<p>并实现手势方法：</p>
-
-<pre><code>- (void)handlePopRecognizer:(UIScreenEdgePanGestureRecognizer*)recognizer {
-    CGFloat progress = [recognizer translationInView:self.view].x / (self.view.bounds.size.width * 1.0);
-    progress = MIN(1.0, MAX(0.0, progress));
-
-    if (recognizer.state == UIGestureRecognizerStateBegan) {
-        // Create a interactive transition and pop the view controller
-        self.interactivePopTransition = [[UIPercentDrivenInteractiveTransition alloc] init];
-        [self.navigationController popViewControllerAnimated:YES];
-    }
-    else if (recognizer.state == UIGestureRecognizerStateChanged) {
-        // Update the interactive transition's progress
-        [self.interactivePopTransition updateInteractiveTransition:progress];
-    }
-    else if (recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled) {
-        // Finish or cancel the interactive transition
-        if (progress &gt; 0.5) {
-            [self.interactivePopTransition finishInteractiveTransition];
-        }
-        else {
-            [self.interactivePopTransition cancelInteractiveTransition];
-        }
-
-        self.interactivePopTransition = nil;
-    }
-
-}
-</code></pre>
-
-<p>最后推荐两篇更详细的教程：</p>
-
-<p>1、<a href="http://dativestudios.com/blog/2013/09/29/interactive-transitions/">interactive-transitions</a>
-2、<a href="http://www.raywenderlich.com/86521/how-to-make-a-view-controller-transition-animation-like-in-the-ping-app">实现ping转场动画</a></p>
-</div>
+  <div class="entry-content"></div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/08/30/navigation-transition/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -290,158 +184,12 @@ popRecognizer.edges = UIRectEdgeLeft;
   </header>
 
 
-  <div class="entry-content"><p> 在之前的一个app中，因为对多线程同步的处理不够好，在某些极端情况下app会发生crash。本文简单介绍一下如何使用<code>@synchronized</code>指令来实现线程安全。苹果文档中对<code>@synchronized</code>指令的说明是：</p>
-
-<p>1.<code>@synchronized</code>指令是Objective-C代码中快捷创建互斥锁的一种方式；</p>
-
-<p>2.<code>@synchronized</code>指令像任何其他的互斥锁一样，防止同一时间不同的线程获取相同的锁。</p>
-
-<p><code>@synchronized</code>指令的使用很简单，只需要传一个参数即可：</p>
-
-<pre><code>@synchronized(key) { 
-    // thread-safe code goes here 
-}
-</code></pre>
-
-<p>一个简单的例子：</p>
-
-<p>定义一个全局的数组变量</p>
-
-<pre><code>NSMutableArray *array;
-</code></pre>
-
-<p>初始化该数组</p>
-
-<pre><code>array = [NSMutableArray arrayWithCapacity:5];
-for (int i = 0; i &lt; 5; i++) {
-    [array addObject:[NSString stringWithFormat:@"array-%i", i]];
-}
-</code></pre>
-
-<p>创建更新数组的方法</p>
-
-<pre><code>- (void)updateArray:(NSString *)value {
-
-    for (int j = 0; j &lt; array.count; j++) {
-
-        NSString *currentObject = [array objectAtIndex:j];
-        [array replaceObjectAtIndex:j withObject:[currentObject stringByAppendingFormat:@"-%@", value]];
-
-        NSLog(@"%@", [array objectAtIndex:j]);
-    }
-}
-</code></pre>
-
-<p>在不同的线程中调用修改数组的方法</p>
-
-<pre><code>NSString *bla = @"bla";
-dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    [self updateArray:bla];
-});
-dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    [self updateArray:bla];
-}); 
-</code></pre>
-
-<p>得到如下结果</p>
-
-<pre><code>array-0-bla
-array-0-bla
-array-1-bla
-array-1-bla-bla
-array-2-bla-bla
-array-2-bla
-array-3-bla
-array-3-bla-bla
-array-4-bla
-array-4-bla-bla
-</code></pre>
-
-<p>显而易见，两个线程在争夺资源，当两个线程彼此作用时可能会导致app的crash。下面，修改一下更新数组的方法：</p>
-
-<pre><code>- (void)updateArray:(NSString *)value {
-
-    @synchronized (value) {
-        for (int j = 0; j &lt; array.count; j++) {
-
-            NSString *currentObject = [array objectAtIndex:j];
-            [array replaceObjectAtIndex:j withObject:[currentObject stringByAppendingFormat:@"-%@", value]];
-
-            NSLog(@"%@", [array objectAtIndex:j]);
-        }
-    }
-}
-</code></pre>
-
-<p>看看结果：</p>
-
-<pre><code>array-0-bla
-array-1-bla
-array-2-bla
-array-3-bla
-array-4-bla
-array-0-bla-bla
-array-1-bla-bla
-array-2-bla-bla
-array-3-bla-bla
-array-4-bla-bla
-</code></pre>
-
-<p>这下感觉醒目多了～原因就是<code>@synchronized</code>指令的代码块暂停了其中一个线程，允许另一个线程访问代码块，一旦另一个线程完成工作，就取消暂停。</p>
-
-<p>注意了，如果你使用相同的对象作为<code>@synchronized</code>的key，那么线程将会被暂停（正如刚才所见）。假如使用不同的对象作为<code>@synchronized</code>的key：</p>
-
-<pre><code>NSString *bla = @"bla";
-NSString *ola = @"ola";
-dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    [self updateArray:bla];
-});
-dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    [self updateArray:ola];
-});
-</code></pre>
-
-<p>再看看结果：</p>
-
-<pre><code>array-0-bla
-array-0-ola
-array-1-bla
-array-1-bla-ola
-array-2-bla
-array-2-bla-ola
-array-3-bla
-array-3-bla-ola
-array-4-bla
-array-4-bla-ola
-</code></pre>
-
-<p>像这种出现多个key的情况，使用</p>
-
-<pre><code>@synchronized (array) { 
-    ...
-</code></pre>
-
-<p>替换</p>
-
-<pre><code>@synchronized (value) { 
-    ...
-</code></pre>
-
-<p>这下妥妥了：</p>
-
-<pre><code>array-0-bla
-array-1-bla
-array-2-bla
-array-3-bla
-array-4-bla
-array-0-bla-ola
-array-1-bla-ola
-array-2-bla-ola
-array-3-bla-ola
-array-4-bla-ola
-</code></pre>
-</div>
+  <div class="entry-content"></div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -475,29 +223,12 @@ array-4-bla-ola
   </header>
 
 
-  <div class="entry-content"><p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
-
-<h3>dispatch_semaphore简介</h3>
-
-<p> <code>dispatch_semaphore_create</code>创建一个带初始值的semaphore；</p>
-
-<p> <code>dispatch_semaphore_signal</code>增加semaphore的计数，并发送semaphore信号；</p>
-
-<p> <code>dispatch_semaphore_wait</code>减少semaphore的计数，并等待semaphore信号的到达。</p>
-
-<p> 示例代码：</p>
-
-<pre><code>dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-
-[self singleBlock:^(id param){
-    // your codes...
-    dispatch_semaphore_signal(sem);
-}];
-
-dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
-</code></pre>
-</div>
+  <div class="entry-content"></div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/09/20/dispatch-semaphore/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -531,95 +262,12 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
   </header>
 
 
-  <div class="entry-content"><p> 在使用<code>NSURLSessionTaskDelegate</code>的时候，一开始并没有进入<code>URLSession:task:didCompleteWithError:</code>回调，阅读苹果给出的文档之后，成功解决。</p>
-
-<h3>NSURLSession简介</h3>
-
-<p> <code>NSURLSession</code>是iOS7带来的诸多新特性之一，旨在替换<code>NSURLConnection</code>。<code>NSURLSession</code>的使用非常简单，步骤如下：</p>
-
-<p> 1.创建并配置<code>NSURLSessionConfiguration</code>;</p>
-
-<p> 2.通过步骤一的configuration创建<code>NSURLSession</code>;</p>
-
-<p> 3.创建相应sessionTask(data、upload or download);</p>
-
-<p> 4.调用<code>resume</code>启动task。</p>
-
-<p> 给出一些例子代码：</p>
-
-<pre><code>NSData *imageData = UIImageJPEGRepresentation([UIImage imageNamed:@"panda.jpg"], 0.6);
-
-NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
-config.HTTPMaximumConnectionsPerHost = 1;
- [config setHTTPAdditionalHeaders:@{@"example_appkey": @"jfdeh79685eun"}];
-
-NSURLSession *upLoadSession = [NSURLSession sessionWithConfiguration:config];
-NSURL *url = [NSURL URLWithString:@"http://example.com"];
-NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
-[request setHTTPMethod:@"PUT"];
-
-NSURLSessionUploadTask *uploadTask = [upLoadSession uploadTaskWithRequest:request fromData:imageData completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-    NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
-    if (!error  &amp;&amp; httpResp.statusCode == 200) {
-        //handle...
-    }
-}];
-
-[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-[_uploadTask resume];
-</code></pre>
-
-<h2>使用NSURLSessionTaskDelegate</h2>
-
-<p> 修改创建uploadSession方法：</p>
-
-<pre><code>NSURLSession *upLoadSession = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
-</code></pre>
-
-<p> 实现<code>&lt;NSURLSessionTaskDelegate&gt;</code>，该委托提供出了能计算上传进度的方法，代码如下：</p>
-
-<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesSent totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend
-{
-    NSLog(@"progress:%f",(double)totalBytesSent / (double)totalBytesExpectedToSend);
-}
-</code></pre>
-
-<p> 将创建uploadTask方法更改为:</p>
-
-<pre><code>NSURLSessionUploadTask *uploadTask = [upLoadSession uploadTaskWithRequest:request fromData:imageData];
-</code></pre>
-
-<p> 当然还有sessionTask完成时的回调：</p>
-
-<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    });
-    if (!error) {
-        //handle..
-    } else {
-        // Alert for error
-    }
-}
-</code></pre>
-
-<p> 但是该委托方法没有被调用。苹果文档指出，如果使用自定义的委托来获取数据，那么以下方法必须被实现：</p>
-
-<p> <code>URLSession:dataTask:didReceiveData:</code> 一点一点地从你发出地请求中取回数据；
- <code>URLSession:task:didCompleteWithError:</code> 数据被完全接收。</p>
-
-<p> 由此可以看出，还需要实现<code>&lt;NSURLSessionDataDelegate&gt;</code>：</p>
-
-<pre><code>-(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data
-{
-
-}
-</code></pre>
-
-<p> 至此，成功进入<code>URLSession:task:didCompleteWithError:</code>。</p>
-</div>
+  <div class="entry-content"></div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/07/27/daily-nsurlsession/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -636,6 +284,10 @@ NSURLSessionUploadTask *uploadTask = [upLoadSession uploadTaskWithRequest:reques
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/07/player-button/">Player-button</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/08/30/navigation-transition/">自定义NavigationController转场动画</a>

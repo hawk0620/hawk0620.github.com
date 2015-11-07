@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-08-30T13:23:59+08:00</updated>
+  <updated>2015-11-07T22:24:44+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -14,11 +14,38 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Player-button]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/11/07/player-button/"/>
+    <updated>2015-11-07T19:42:48+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/11/07/player-button</id>
+    <content type="html"><![CDATA[<p>&lt;!&mdash;more&mdash;></p>
+
+<p><img src="http://7xkwuq.com1.z0.glb.clouddn.com/player_button.gif" alt="alt tag" /></p>
+
+<p>最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。</p>
+
+<p>首先我使用<code>CABasicAnimation</code>，在按钮的线条滑到下方终点时，通过动画完成的<code>delegate</code>方法:</p>
+
+<pre><code>- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+</code></pre>
+
+<p>让线条再到达上方的终点，并以此循环，最终实现线条一上一下的效果。但是在实际中，通过反复给<code>layer</code>添加动画，线条的速率得不到保证，最终会出现线条移动错乱的问题。
+在我陷入困苦之后，<code>CAKeyFrameAnimation</code>映入眼帘，我通过帧动画，把之前线条移到下方终点和上方终点的方法进行优化，帧动画的第一个位置是当前初始位置，其次是下方终点，上方终点，再是初始位置，并为每一帧动画计算了时间。通过帧动画实现了我的需求：）</p>
+
+<p>源码我已经放到了Github上面:
+<a href="https://github.com/hawk0620/ZPPlayerButton">https://github.com/hawk0620/ZPPlayerButton</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[自定义NavigationController转场动画]]></title>
     <link href="http://hawk0620.github.io/blog/2015/08/30/navigation-transition/"/>
     <updated>2015-08-30T08:29:21+08:00</updated>
     <id>http://hawk0620.github.io/blog/2015/08/30/navigation-transition</id>
-    <content type="html"><![CDATA[<p> 这篇文章简单介绍下如何自定义UINavigationController转场动画，其大致的思路是:</p>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p> 这篇文章简单介绍下如何自定义UINavigationController转场动画，其大致的思路是:</p>
 
 <p> 1、实现<UINavigationControllerDelegate>协议的方法:</p>
 
@@ -187,7 +214,10 @@ popRecognizer.edges = UIRectEdgeLeft;
     <link href="http://hawk0620.github.io/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/"/>
     <updated>2015-06-02T07:59:59+08:00</updated>
     <id>http://hawk0620.github.io/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi</id>
-    <content type="html"><![CDATA[<p> 在之前的一个app中，因为对多线程同步的处理不够好，在某些极端情况下app会发生crash。本文简单介绍一下如何使用<code>@synchronized</code>指令来实现线程安全。苹果文档中对<code>@synchronized</code>指令的说明是：</p>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p> 在之前的一个app中，因为对多线程同步的处理不够好，在某些极端情况下app会发生crash。本文简单介绍一下如何使用<code>@synchronized</code>指令来实现线程安全。苹果文档中对<code>@synchronized</code>指令的说明是：</p>
 
 <p>1.<code>@synchronized</code>指令是Objective-C代码中快捷创建互斥锁的一种方式；</p>
 
@@ -345,7 +375,10 @@ array-4-bla-ola
     <link href="http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore/"/>
     <updated>2014-09-20T19:36:00+08:00</updated>
     <id>http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore</id>
-    <content type="html"><![CDATA[<p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
 
 <h3>dispatch_semaphore简介</h3>
 
@@ -374,7 +407,10 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
     <link href="http://hawk0620.github.io/blog/2014/07/27/daily-nsurlsession/"/>
     <updated>2014-07-27T13:42:05+08:00</updated>
     <id>http://hawk0620.github.io/blog/2014/07/27/daily-nsurlsession</id>
-    <content type="html"><![CDATA[<p> 在使用<code>NSURLSessionTaskDelegate</code>的时候，一开始并没有进入<code>URLSession:task:didCompleteWithError:</code>回调，阅读苹果给出的文档之后，成功解决。</p>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p> 在使用<code>NSURLSessionTaskDelegate</code>的时候，一开始并没有进入<code>URLSession:task:didCompleteWithError:</code>回调，阅读苹果给出的文档之后，成功解决。</p>
 
 <h3>NSURLSession简介</h3>
 

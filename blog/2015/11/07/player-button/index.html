@@ -5,15 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - 陈浩的技术博客</title>
+  <title>Player-button - 陈浩的技术博客</title>
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="Blog Archive 2015 Player-button
-Nov 07 2015 自定义NavigationController转场动画
-Aug 30 2015 iOS 线程同步: @synchronized指令
-Jun 02 2015 2014 GCD(semaphore)的日常
-Sep &hellip;">
+  <meta name="description" content="&lt;!&mdash;more&mdash;> 最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。 首先我使用CABasicAnimation，在按钮的线条滑到下方终点时，通过动画完成的delegate方法: - (void)animationDidStop:( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -22,7 +18,7 @@ Sep &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hawk0620.github.io/blog/archives">
+  <link rel="canonical" href="http://hawk0620.github.io/blog/2015/11/07/player-button">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
@@ -68,74 +64,91 @@ Sep &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">Player-button</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-07T19:42:48+08:00" pubdate data-updated="true">Nov 7<sup>th</sup>, 2015</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
+<div class="entry-content"><p>&lt;!&mdash;more&mdash;></p>
 
-  
-  <h2>2015</h2>
+<p><img src="http://7xkwuq.com1.z0.glb.clouddn.com/player_button.gif" alt="alt tag" /></p>
 
-<article>
-  
-<h1><a href="/blog/2015/11/07/player-button/">Player-button</a></h1>
-<time datetime="2015-11-07T19:42:48+08:00" pubdate><span class='month'>Nov</span> <span class='day'>07</span> <span class='year'>2015</span></time>
+<p>最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。</p>
 
+<p>首先我使用<code>CABasicAnimation</code>，在按钮的线条滑到下方终点时，通过动画完成的<code>delegate</code>方法:</p>
 
-</article>
+<pre><code>- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+</code></pre>
 
+<p>让线条再到达上方的终点，并以此循环，最终实现线条一上一下的效果。但是在实际中，通过反复给<code>layer</code>添加动画，线条的速率得不到保证，最终会出现线条移动错乱的问题。
+在我陷入困苦之后，<code>CAKeyFrameAnimation</code>映入眼帘，我通过帧动画，把之前线条移到下方终点和上方终点的方法进行优化，帧动画的第一个位置是当前初始位置，其次是下方终点，上方终点，再是初始位置，并为每一帧动画计算了时间。通过帧动画实现了我的需求：）</p>
 
-
-<article>
-  
-<h1><a href="/blog/2015/08/30/navigation-transition/">自定义NavigationController转场动画</a></h1>
-<time datetime="2015-08-30T08:29:21+08:00" pubdate><span class='month'>Aug</span> <span class='day'>30</span> <span class='year'>2015</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/">iOS 线程同步: @synchronized指令</a></h1>
-<time datetime="2015-06-02T07:59:59+08:00" pubdate><span class='month'>Jun</span> <span class='day'>02</span> <span class='year'>2015</span></time>
-
-
-</article>
-
-
-
-  
-  <h2>2014</h2>
-
-<article>
-  
-<h1><a href="/blog/2014/09/20/dispatch-semaphore/">GCD(semaphore)的日常</a></h1>
-<time datetime="2014-09-20T19:36:00+08:00" pubdate><span class='month'>Sep</span> <span class='day'>20</span> <span class='year'>2014</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2014/07/27/daily-nsurlsession/">NSURLSession的日常</a></h1>
-<time datetime="2014-07-27T13:42:05+08:00" pubdate><span class='month'>Jul</span> <span class='day'>27</span> <span class='year'>2014</span></time>
-
-
-</article>
-
+<p>源码我已经放到了Github上面:
+<a href="https://github.com/hawk0620/ZPPlayerButton">https://github.com/hawk0620/ZPPlayerButton</a></p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Hawk0620</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-07T19:42:48+08:00" pubdate data-updated="true">Nov 7<sup>th</sup>, 2015</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/08/30/navigation-transition/" title="Previous Post: 自定义NavigationController转场动画">&laquo; 自定义NavigationController转场动画</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>
