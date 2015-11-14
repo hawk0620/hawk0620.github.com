@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content=" 最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。 ">
+  <meta name="description" content="前不久在做iOS录制视频遇到了前置摄像头录制的时候视频翻转的问题，相比起以前我做拍照的翻转仅仅只需简单的把图片位置纠正： UIImage *newImage = [UIImage imageWithCGImage:[image CGImage] scale:1 orientation: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,52 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/14/record-video-mirror/">iOS拍视频前置摄像头翻转的解决</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-14T10:18:42+08:00" pubdate data-updated="true">Nov 14<sup>th</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前不久在做iOS录制视频遇到了前置摄像头录制的时候视频翻转的问题，相比起以前我做拍照的翻转仅仅只需简单的把图片位置纠正：</p>
+
+<pre><code>UIImage *newImage = [UIImage imageWithCGImage:[image CGImage] scale:1 orientation:UIImageOrientationLeftMirrored];
+</code></pre>
+
+<p>视频的翻转就比较麻烦，其大致思路是通过<code>CGAffineTransform</code>变换调整视频在屏幕中的位置，再使用<code>AVMutableVideoComposition</code>进行视频的重新组成，最后使用<code>AVAssetExportSession</code>进行视频的导出即可，以下是翻转以及裁剪出方形视频的代码：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/11/14/record-video-mirror/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -297,6 +343,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/14/record-video-mirror/">iOS拍视频前置摄像头翻转的解决</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/07/player-button/">用CoreAnimation实现的播放按钮</a>
       </li>
     
@@ -310,10 +360,6 @@
     
       <li class="post">
         <a href="/blog/2014/09/20/dispatch-semaphore/">GCD(semaphore)的日常</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/27/daily-nsurlsession/">NSURLSession的日常</a>
       </li>
     
   </ul>

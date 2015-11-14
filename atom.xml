@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-07T22:34:46+08:00</updated>
+  <updated>2015-11-14T11:19:59+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,81 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[iOS拍视频前置摄像头翻转的解决]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/11/14/record-video-mirror/"/>
+    <updated>2015-11-14T10:18:42+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/11/14/record-video-mirror</id>
+    <content type="html"><![CDATA[<p>前不久在做iOS录制视频遇到了前置摄像头录制的时候视频翻转的问题，相比起以前我做拍照的翻转仅仅只需简单的把图片位置纠正：</p>
+
+<pre><code>UIImage *newImage = [UIImage imageWithCGImage:[image CGImage] scale:1 orientation:UIImageOrientationLeftMirrored];
+</code></pre>
+
+<p>视频的翻转就比较麻烦，其大致思路是通过<code>CGAffineTransform</code>变换调整视频在屏幕中的位置，再使用<code>AVMutableVideoComposition</code>进行视频的重新组成，最后使用<code>AVAssetExportSession</code>进行视频的导出即可，以下是翻转以及裁剪出方形视频的代码：</p>
+
+<!--more-->
+
+
+<pre><code>// your own asset
+AVAssetTrack *clipVideoTrack = [[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
+
+AVMutableVideoComposition* videoComposition = [AVMutableVideoComposition videoComposition];
+videoComposition.frameDuration = CMTimeMake(1, 30);
+
+videoComposition.renderSize = CGSizeMake(clipVideoTrack.naturalSize.height, clipVideoTrack.naturalSize.height);
+
+//create a video instruction
+AVMutableVideoCompositionInstruction *instruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
+instruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeMakeWithSeconds(60, 30));
+
+AVMutableVideoCompositionLayerInstruction* transformer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:clipVideoTrack];
+// 前方高能
+CGAffineTransform finalTransform ＝ CGAffineTransformIdentity;
+// 翻转，仅是前置摄像头需要
+finalTransform = CGAffineTransformMakeScale(-1.0f, 1.0f);
+// 视频竖直方向中间的位置
+finalTransform = CGAffineTransformTranslate(finalTransform, clipVideoTrack.naturalSize.height, -(clipVideoTrack.naturalSize.width - clipVideoTrack.naturalSize.height) /2);
+// finalTransform = CGAffineTransformTranslate(finalTransform, clipVideoTrack.naturalSize.height, 0);视频最顶部的位置
+finalTransform = CGAffineTransformRotate(finalTransform, M_PI_2);
+finalTransform = CGAffineTransformTranslate(finalTransform, 0.0f, clipVideoTrack.naturalSize.height);
+
+[transformer setTransform:finalTransform atTime:kCMTimeZero];
+instruction.layerInstructions = [NSArray arrayWithObject:transformer];
+videoComposition.instructions = [NSArray arrayWithObject: instruction];
+
+ // 导出
+AVAssetExportSession *exporter = [[AVAssetExportSession alloc] initWithAsset:self.secondAsset presetName:AVAssetExportPresetHighestQuality] ;
+exporter.videoComposition = videoComposition;
+exporter.outputURL=[NSURL fileURLWithPath:outputPath];
+exporter.outputFileType=AVFileTypeQuickTimeMovie;
+[exporter exportAsynchronouslyWithCompletionHandler:^(void){
+    // your handle with exporter.status
+}];
+</code></pre>
+
+<p>补充一下，如果不是前置摄像头，如果要裁减出方形的视频只需要：</p>
+
+<pre><code>CGAffineTransform t1 = CGAffineTransformMakeTranslation(track.naturalSize.height, -(track.naturalSize.width - track.naturalSize.height) /2 );
+CGAffineTransform t2 = CGAffineTransformRotate(t1, M_PI_2);
+</code></pre>
+
+<p>如果需要拍出的视频自定义裁剪的区域，可以指定<code>cropRect</code>，代码如下：</p>
+
+<pre><code>CGFloat cropOffX = cropRect.origin.x;
+CGFloat cropOffY = cropRect.origin.y;
+CGFloat cropWidth = cropRect.size.width;
+CGFloat cropHeight = cropRect.size.height;
+videoComposition.renderSize = CGSizeMake(cropWidth, cropHeight);
+CGAffineTransform t1 = CGAffineTransformIdentity;
+CGAffineTransform t2 = CGAffineTransformIdentity;
+t1 = CGAffineTransformMakeTranslation(clipVideoTrack.naturalSize.height - cropOffX, 0 - cropOffY );
+t2 = CGAffineTransformRotate(t1, M_PI_2 );
+</code></pre>
+
+<p>全文完～</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用CoreAnimation实现的播放按钮]]></title>
