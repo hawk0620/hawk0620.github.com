@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="前不久在做iOS录制视频遇到了前置摄像头录制的时候视频翻转的问题，相比起以前我做拍照的翻转仅仅只需简单的把图片位置纠正： UIImage *newImage = [UIImage imageWithCGImage:[image CGImage] scale:1 orientation: &hellip;">
+  <meta name="description" content="从体验说起 &emsp;&emsp;对比微信和Instagram可以发现播放视频的两个思路：微信的处理是把视频加载好后播放，这样确保了视频是完整的，用户很直观视频是否下载完成，不影响用户观看视频的体验；而Instagram的做法是边加载边播，当网络不给力的时候，视频就卡在那里， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,53 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/17/ios-play-video/">“探索向～iOS视频播放”</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-17T21:50:18+08:00" pubdate data-updated="true">Nov 17<sup>th</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>从体验说起</h4>
+
+<p>&emsp;&emsp;对比微信和Instagram可以发现播放视频的两个思路：微信的处理是把视频加载好后播放，这样确保了视频是完整的，用户很直观视频是否下载完成，不影响用户观看视频的体验；而Instagram的做法是边加载边播，当网络不给力的时候，视频就卡在那里，给用户增加了观看视频的焦虑，并且用户还得自己判断下视频是不是加载完成了，最不幸的是，当视频的网络请求不可达时，不能给出加载失败的提示引导用户重新加载，只能滑动列表触发刷新。</p>
+
+<h4>播放视频的实现</h4>
+
+<p>1、通过实践，我发现Instagram采用的应该是<code>AVPlayer</code>实现的。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/11/17/ios-play-video/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -343,6 +390,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/17/ios-play-video/">“探索向～iOS视频播放”</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/14/record-video-mirror/">iOS拍视频前置摄像头翻转的解决</a>
       </li>
     
@@ -356,10 +407,6 @@
     
       <li class="post">
         <a href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/">iOS 线程同步: @synchronized指令</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/20/dispatch-semaphore/">GCD(semaphore)的日常</a>
       </li>
     
   </ul>

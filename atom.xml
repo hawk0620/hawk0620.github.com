@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-14T11:19:59+08:00</updated>
+  <updated>2015-11-17T23:09:52+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,127 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[“探索向～iOS视频播放”]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/11/17/ios-play-video/"/>
+    <updated>2015-11-17T21:50:18+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/11/17/ios-play-video</id>
+    <content type="html"><![CDATA[<h4>从体验说起</h4>
+
+<p>&emsp;&emsp;对比微信和Instagram可以发现播放视频的两个思路：微信的处理是把视频加载好后播放，这样确保了视频是完整的，用户很直观视频是否下载完成，不影响用户观看视频的体验；而Instagram的做法是边加载边播，当网络不给力的时候，视频就卡在那里，给用户增加了观看视频的焦虑，并且用户还得自己判断下视频是不是加载完成了，最不幸的是，当视频的网络请求不可达时，不能给出加载失败的提示引导用户重新加载，只能滑动列表触发刷新。</p>
+
+<h4>播放视频的实现</h4>
+
+<p>1、通过实践，我发现Instagram采用的应该是<code>AVPlayer</code>实现的。</p>
+
+<!--more-->
+
+
+<p><code>AVPlayerItem</code>可以通过远程URL创建出来，并且支持流的形式播放，还可以添加视频播放卡住和视频播放完成的两个观察者：</p>
+
+<pre><code>[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidBufferPlaying:) name:AVPlayerItemPlaybackStalledNotification object:nil];
+[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidFinishPlaying:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+</code></pre>
+
+<p>但遗憾的是，我没有找到视频加载失败的观察者。</p>
+
+<p>2、结合微信团队的技术分享<a href="http://mp.weixin.qq.com/s?__biz=MzAwNDY1ODY2OQ==&amp;mid=207686973&amp;idx=1&amp;sn=1883a6c9fa0462dd5596b8890b6fccf6&amp;scene=0#wechat_redirect">链接</a>，得知微信的视频播放是采用<code>AVAssetReader</code>+<code>AVAssetReaderTrackOutput</code>，根据微信的思路，自己也尝试实现了一番：
+buffer的转换：</p>
+
+<pre><code>- (CGImageRef) imageFromSampleBuffer:(CMSampleBufferRef) sampleBuffer {
+   CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+   // Lock the base address of the pixel buffer
+   CVPixelBufferLockBaseAddress(imageBuffer, 0);
+   // Get the number of bytes per row for the pixel buffer
+   size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+   // Get the pixel buffer width and height
+   size_t width = CVPixelBufferGetWidth(imageBuffer);
+   size_t height = CVPixelBufferGetHeight(imageBuffer);
+   //Generate image to edit
+   unsigned char* pixel = (unsigned char *)CVPixelBufferGetBaseAddress(imageBuffer);
+   CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+   CGContextRef context=CGBitmapContextCreate(pixel, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little|kCGImageAlphaPremultipliedFirst);
+   CGImageRef image = CGBitmapContextCreateImage(context);
+   CGContextRelease(context);
+   CGColorSpaceRelease(colorSpace);
+   return image;
+}
+</code></pre>
+
+<p>视频的解码：</p>
+
+<pre><code>AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:path] options:nil];
+NSError *error;
+AVAssetReader* reader = [[AVAssetReader alloc] initWithAsset:asset error:&amp;error];
+NSArray* videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+AVAssetTrack* videoTrack = [videoTracks objectAtIndex:0];
+
+int m_pixelFormatType = kCVPixelFormatType_32BGRA;
+NSDictionary* options = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt: (int)m_pixelFormatType] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+AVAssetReaderTrackOutput* videoReaderOutput = [[AVAssetReaderTrackOutput alloc] initWithTrack:videoTrack outputSettings:options];
+[reader addOutput:videoReaderOutput];
+[reader startReading];
+
+// 读取视频每一个buffer转换成CGImageRef
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+   CMSampleBufferRef audioSampleBuffer = NULL;
+   while ([reader status] == AVAssetReaderStatusReading &amp;&amp; videoTrack.nominalFrameRate &gt; 0) {
+   CMSampleBufferRef sampleBuffer = [videoReaderOutput copyNextSampleBuffer];
+   CGImageRef image = [self imageFromSampleBuffer:sampleBuffer];
+   if (self.delegate &amp;&amp; [self.delegate respondsToSelector:@selector(mMovieDecoder:onNewVideoFrameReady:)]) {
+        [self.delegate mMovieDecoder:self onNewVideoFrameReady:image];
+    }
+   if(sampleBuffer) {
+       if(audioSampleBuffer) { // release old buffer.
+            CFRelease(audioSampleBuffer);
+            audioSampleBuffer = nil;
+       }
+       audioSampleBuffer = sampleBuffer;
+   } else {
+       break;
+   }
+
+// 休眠的间隙刚好是每一帧的间隔
+   [NSThread sleepForTimeInterval:CMTimeGetSeconds(videoTrack.minFrameDuration)];
+ }
+ // decode finish
+ float durationInSeconds = CMTimeGetSeconds(asset.duration);
+  if (self.delegate &amp;&amp; [self.delegate respondsToSelector:@selector(mMovieDecoderOnDecodeFinished:duration:)]) {
+     [self.delegate mMovieDecoderOnDecodeFinished:self duration:durationInSeconds];
+   }
+});
+</code></pre>
+
+<p>处理每一帧CGImageRef的回调：</p>
+
+<pre><code>- (void)mMovieDecoder:(VideoDecoder *)decoder onNewVideoFrameReady:(CGImageRef)imgRef {
+    __weak PlayBackView *weakView = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        weakView.layer.contents = (__bridge id _Nullable)(imgRef);
+    });
+}
+</code></pre>
+
+<p>处理视频解码完成的回调：</p>
+
+<pre><code>images即每一帧传上来的CGImageRef的数组
+- (void)mMovieDecoderOnDecodeFinished:(VideoDecoder *)decoder images:(NSArray *)imgs duration:(float)duration {
+    __weak PlayBackView *weakView = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        weakView.layer.contents = nil;
+
+        CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath: @"contents"];
+        animation.calculationMode = kCAAnimationDiscrete;
+        animation.duration = duration;
+        animation.repeatCount = HUGE; //循环播放
+        animation.values = images; // NSArray of CGImageRefs
+        [weakView.layer addAnimation:animation forKey: @"contents"];
+    });
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[iOS拍视频前置摄像头翻转的解决]]></title>
