@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-17T23:13:01+08:00</updated>
+  <updated>2015-11-21T20:23:07+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -14,7 +14,91 @@
 
   
   <entry>
-    <title type="html"><![CDATA[“探索向～iOS视频播放”]]></title>
+    <title type="html"><![CDATA[AutoLayout实现的动态TableView高度]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/11/21/daymic-tableview-height/"/>
+    <updated>2015-11-21T18:15:37+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/11/21/daymic-tableview-height</id>
+    <content type="html"><![CDATA[<p>本文将介绍下AutoLayout使用纯代码来实现TableView的动态高度。</p>
+
+<p>效果图如下：
+<img src="https://cloud.githubusercontent.com/assets/5633917/11318437/e0909810-908c-11e5-849b-4a40adc10c18.png" alt="dd" /></p>
+
+<p>1、子类化一个UITableViewCell，定义三个控件：</p>
+
+<pre><code>@property (nonatomic, strong) ZPLabel *titleLabel;
+@property (nonatomic, strong) ZPLabel *subtitleLabel;
+@property (nonatomic, strong) UIImageView *customImageView;
+</code></pre>
+
+<p>再在.m文件中创建这三个控件，并添加进<code>cell</code>的<code>contentView</code>中，最后为这三个控件添加约束，这里用到了<code>Masonry</code>：</p>
+
+<!--more-->
+
+
+<pre><code>// customImageView constraint
+[self.customImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.top.equalTo(self.contentView.mas_top).with.offset(20);
+    make.bottom.lessThanOrEqualTo(self.contentView.mas_bottom)
+    .with.offset(-20);
+        make.leading.equalTo(self.contentView.mas_leading).with
+        .offset(20);
+    make.width.equalTo(@100).with.priority(999);
+    make.height.equalTo(@100).with.priority(999);
+}];
+// titleLabel constraint
+[self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+   make.top.equalTo(self.contentView.mas_top).with.offset(20);
+   make.trailing.equalTo(self.contentView.mas_trailing).with
+       .offset(-20);
+   make.leading.equalTo(self.customImageView.mas_trailing).with
+   .offset(8);
+}];
+// subtitleLabel constraint
+UIEdgeInsets subTitlePadding = UIEdgeInsetsMake(0, 8, -20, -20);
+[self.subtitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.top.equalTo(self.titleLabel.mas_bottom).with
+   .offset(subTitlePadding.top);
+   make.trailing.equalTo(self.contentView.mas_trailing).with
+   .offset(subTitlePadding.right);
+   make.bottom.lessThanOrEqualTo(self.contentView.mas_bottom).
+   with.offset(subTitlePadding.bottom);
+   make.leading.equalTo(self.customImageView.mas_trailing)
+   .with.offset(subTitlePadding.left);
+}];
+</code></pre>
+
+<p>2、在viewController中的<code>tableView:cellForRowAtIndexPath:</code>方法里对每次设置完<code>titleLabel </code>和<code>subtitleLabel</code>的text属性后都要调用<code>invalidateIntrinsicContentSize</code>来重新计算<code>label</code>的内置大小<code>intrinsicContentSize</code>：</p>
+
+<pre><code>// cell title
+NSString *title = item[@"title"];
+[cell.titleLabel setText:title];
+[cell.titleLabel invalidateIntrinsicContentSize];
+// cell subtitle
+NSString *subtitle = item[@"context"];
+if (subtitle.length &gt; 200) {
+   subtitle = [NSString stringWithFormat:@"%@...", [subtitle substringToIndex:200]];
+}
+[cell.subtitleLabel setText:subtitle];
+[cell.subtitleLabel invalidateIntrinsicContentSize];
+</code></pre>
+
+<p>3、最后在<code>heightForImageCellAtIndexPath:</code>中通过重新布局和使用<code>systemLayoutSizeFittingSize:</code>计算出cell的高度：</p>
+
+<pre><code>sizingCell.bounds = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.tableView.frame), CGRectGetHeight(sizingCell.bounds));
+
+[sizingCell setNeedsLayout];
+[sizingCell layoutIfNeeded];
+
+CGSize size = [sizingCell.contentView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
+return size.height + 1.0f;
+</code></pre>
+
+<p>最后附上<a href="https://github.com/hawk0620/DaymicTableDemo">源码链接</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[探索向～iOS视频播放]]></title>
     <link href="http://hawk0620.github.io/blog/2015/11/17/ios-play-video/"/>
     <updated>2015-11-17T21:50:18+08:00</updated>
     <id>http://hawk0620.github.io/blog/2015/11/17/ios-play-video</id>

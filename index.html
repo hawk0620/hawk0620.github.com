@@ -9,7 +9,8 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="从体验说起 &emsp;&emsp;对比微信和Instagram可以发现播放视频的两个思路：微信的处理是把视频加载好后播放，这样确保了视频是完整的，用户很直观视频是否下载完成，不影响用户观看视频的体验；而Instagram的做法是边加载边播，当网络不给力的时候，视频就卡在那里， &hellip;">
+  <meta name="description" content="本文将介绍下AutoLayout使用纯代码来实现TableView的动态高度。 效果图如下： 1、子类化一个UITableViewCell，定义三个控件： @property (nonatomic, strong) ZPLabel *titleLabel;
+@property (nonatomic &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,7 +72,60 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/11/17/ios-play-video/">“探索向～iOS视频播放”</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/11/21/daymic-tableview-height/">AutoLayout实现的动态TableView高度</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-21T18:15:37+08:00" pubdate data-updated="true">Nov 21<sup>st</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文将介绍下AutoLayout使用纯代码来实现TableView的动态高度。</p>
+
+<p>效果图如下：
+<img src="https://cloud.githubusercontent.com/assets/5633917/11318437/e0909810-908c-11e5-849b-4a40adc10c18.png" alt="dd" /></p>
+
+<p>1、子类化一个UITableViewCell，定义三个控件：</p>
+
+<pre><code>@property (nonatomic, strong) ZPLabel *titleLabel;
+@property (nonatomic, strong) ZPLabel *subtitleLabel;
+@property (nonatomic, strong) UIImageView *customImageView;
+</code></pre>
+
+<p>再在.m文件中创建这三个控件，并添加进<code>cell</code>的<code>contentView</code>中，最后为这三个控件添加约束，这里用到了<code>Masonry</code>：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/11/21/daymic-tableview-height/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/17/ios-play-video/">探索向～iOS视频播放</a></h1>
     
     
       <p class="meta">
@@ -390,7 +444,11 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/11/17/ios-play-video/">“探索向～iOS视频播放”</a>
+        <a href="/blog/2015/11/21/daymic-tableview-height/">AutoLayout实现的动态TableView高度</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/17/ios-play-video/">探索向～iOS视频播放</a>
       </li>
     
       <li class="post">
@@ -403,10 +461,6 @@
     
       <li class="post">
         <a href="/blog/2015/08/30/navigation-transition/">自定义NavigationController转场动画</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/">iOS 线程同步: @synchronized指令</a>
       </li>
     
   </ul>

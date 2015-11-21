@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>AutoLayout实现的动态TableView高度 - 陈浩的技术博客</title>
+  <meta name="author" content="Hawk0620">
+
+  
+  <meta name="description" content="本文将介绍下AutoLayout使用纯代码来实现TableView的动态高度。 效果图如下： 1、子类化一个UITableViewCell，定义三个控件： @property (nonatomic, strong) ZPLabel *titleLabel;
+@property (nonatomic &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hawk0620.github.io/blog/2015/11/21/daymic-tableview-height">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">陈浩的技术博客</a></h1>
+  
+    <h2>我打码有时快，有时慢，有时粗暴，有时飘逸，有时不知怎么办～</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hawk0620.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">AutoLayout实现的动态TableView高度</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-21T18:15:37+08:00" pubdate data-updated="true">Nov 21<sup>st</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文将介绍下AutoLayout使用纯代码来实现TableView的动态高度。</p>
+
+<p>效果图如下：
+<img src="https://cloud.githubusercontent.com/assets/5633917/11318437/e0909810-908c-11e5-849b-4a40adc10c18.png" alt="dd" /></p>
+
+<p>1、子类化一个UITableViewCell，定义三个控件：</p>
+
+<pre><code>@property (nonatomic, strong) ZPLabel *titleLabel;
+@property (nonatomic, strong) ZPLabel *subtitleLabel;
+@property (nonatomic, strong) UIImageView *customImageView;
+</code></pre>
+
+<p>再在.m文件中创建这三个控件，并添加进<code>cell</code>的<code>contentView</code>中，最后为这三个控件添加约束，这里用到了<code>Masonry</code>：</p>
+
+<!--more-->
+
+
+<pre><code>// customImageView constraint
+[self.customImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.top.equalTo(self.contentView.mas_top).with.offset(20);
+    make.bottom.lessThanOrEqualTo(self.contentView.mas_bottom)
+    .with.offset(-20);
+        make.leading.equalTo(self.contentView.mas_leading).with
+        .offset(20);
+    make.width.equalTo(@100).with.priority(999);
+    make.height.equalTo(@100).with.priority(999);
+}];
+// titleLabel constraint
+[self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+   make.top.equalTo(self.contentView.mas_top).with.offset(20);
+   make.trailing.equalTo(self.contentView.mas_trailing).with
+       .offset(-20);
+   make.leading.equalTo(self.customImageView.mas_trailing).with
+   .offset(8);
+}];
+// subtitleLabel constraint
+UIEdgeInsets subTitlePadding = UIEdgeInsetsMake(0, 8, -20, -20);
+[self.subtitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.top.equalTo(self.titleLabel.mas_bottom).with
+   .offset(subTitlePadding.top);
+   make.trailing.equalTo(self.contentView.mas_trailing).with
+   .offset(subTitlePadding.right);
+   make.bottom.lessThanOrEqualTo(self.contentView.mas_bottom).
+   with.offset(subTitlePadding.bottom);
+   make.leading.equalTo(self.customImageView.mas_trailing)
+   .with.offset(subTitlePadding.left);
+}];
+</code></pre>
+
+<p>2、在viewController中的<code>tableView:cellForRowAtIndexPath:</code>方法里对每次设置完<code>titleLabel </code>和<code>subtitleLabel</code>的text属性后都要调用<code>invalidateIntrinsicContentSize</code>来重新计算<code>label</code>的内置大小<code>intrinsicContentSize</code>：</p>
+
+<pre><code>// cell title
+NSString *title = item[@"title"];
+[cell.titleLabel setText:title];
+[cell.titleLabel invalidateIntrinsicContentSize];
+// cell subtitle
+NSString *subtitle = item[@"context"];
+if (subtitle.length &gt; 200) {
+   subtitle = [NSString stringWithFormat:@"%@...", [subtitle substringToIndex:200]];
+}
+[cell.subtitleLabel setText:subtitle];
+[cell.subtitleLabel invalidateIntrinsicContentSize];
+</code></pre>
+
+<p>3、最后在<code>heightForImageCellAtIndexPath:</code>中通过重新布局和使用<code>systemLayoutSizeFittingSize:</code>计算出cell的高度：</p>
+
+<pre><code>sizingCell.bounds = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.tableView.frame), CGRectGetHeight(sizingCell.bounds));
+
+[sizingCell setNeedsLayout];
+[sizingCell layoutIfNeeded];
+
+CGSize size = [sizingCell.contentView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
+return size.height + 1.0f;
+</code></pre>
+
+<p>最后附上<a href="https://github.com/hawk0620/DaymicTableDemo">源码链接</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Hawk0620</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-21T18:15:37+08:00" pubdate data-updated="true">Nov 21<sup>st</sup>, 2015</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/17/ios-play-video/" title="Previous Post: 探索向～iOS视频播放">&laquo; 探索向～iOS视频播放</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/daymic-tableview-height/">AutoLayout实现的动态TableView高度</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/17/ios-play-video/">探索向～iOS视频播放</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/14/record-video-mirror/">iOS拍视频前置摄像头翻转的解决</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/07/player-button/">用CoreAnimation实现的播放按钮</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/30/navigation-transition/">自定义NavigationController转场动画</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Hawk0620 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
