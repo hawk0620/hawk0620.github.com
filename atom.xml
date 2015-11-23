@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-21T20:23:07+08:00</updated>
+  <updated>2015-11-23T16:37:34+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,36 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[如何在Objective-C的项目中使用Swift的第三方库]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/11/23/how-to-import-swift-into-objc/"/>
+    <updated>2015-11-23T15:48:42+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/11/23/how-to-import-swift-into-objc</id>
+    <content type="html"><![CDATA[<h3>让人惊艳的APNG</h3>
+
+<p>&emsp;&emsp;以前只知道动图就是Gif，但是Gif有挺多缺点的，譬如有锯齿，不支持背景透明。后来知道了还有一种叫做APNG的动图格式，由于APNG是PNG的扩展，所以它支持半透明，自然就不会有锯齿的问题。要想在iOS中使用APNG动图，可以使用喵神（onevcat）用Swift开发的<a href="https://github.com/onevcat/APNGKit">APNGKit</a></p>
+
+<!--more-->
+
+
+<h3>神奇的Swift Bridging Header</h3>
+
+<p>&emsp;&emsp;如果你的项目是Objective-C开发的（譬如像我手里的旧项目>_&lt;），其实也没有那么沮丧。接下来我将会简单说下步骤：</p>
+
+<p>1、在Xcode中New File->Source->Header File，创建一个名为&#8221;YourProjectName-Bridging-Header.h&#8221;的头文件，注意此处一定要你的项目名称；</p>
+
+<p>2、然后在build settings中搜索Swift Compiler，找到Objective-C Bridging Header选项，并修改它的值为你刚才创建的&#8221;ProjectName-Bridging-Header.h&#8221;；</p>
+
+<p>3、接着再打开你的bridging header文件，并加入#import语句，譬如我使用APNGKit加入的是<code>#import "png.h"</code>；</p>
+
+<p>4、还要在build settings中确保Product Module Name是你app target的名字，Defines Module置为YES，Embedded Content Contains Swift置为YES,Install Objective-C Compatibility Header置为YES；</p>
+
+<p>5、虐心的事情终于结束了，最后在你想使用第三方库的.m文件中<code>#import "{YOUR\_APP\_MODULE\_NAME}-Swift.h"</code>，再#import第三方库的头文件即可。</p>
+
+<p>PS：由于喵神的APNGKit没有提供每一帧的回调，我还下狠手修改了喵神的代码&hellip;</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AutoLayout实现的动态TableView高度]]></title>
