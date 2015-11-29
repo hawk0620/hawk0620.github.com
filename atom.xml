@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-23T16:37:34+08:00</updated>
+  <updated>2015-11-30T01:47:26+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,91 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[如何在编译过程中改变APPIcon]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/11/29/fun-with-app-icon/"/>
+    <updated>2015-11-29T23:42:26+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/11/29/fun-with-app-icon</id>
+    <content type="html"><![CDATA[<h3>为什么可以改变AppIcon</h3>
+
+<p>&emsp;&emsp;为了说明为什么可以改变，首先来点题外话。相信我们都知道怎么给app换icon——把图片拖进工程的Images.xcassets->AppIcon.appiconset，很明显app icon位于<code>Project Name/Images.xcassets/AppIcon.appiconset/xxx.png</code>。当我们<code>cmd+r</code>运行工程时，会生成一个<code>/User/username/Library/Developer/Xcode/.../.../Debug-iphoneos/Your Project Name.app</code>这样的路径，它包含了工程中所有的干货，当然app icons也在其中。</p>
+
+<!--more-->
+
+
+<p>假设你在工程中加了张名为AppIcon60x60@2x.png的icon，你可以在Build Phases点击+，再点击New Run Script，并添加如下代码：</p>
+
+<pre><code>IFS=$'\n' #防止工程名中有空格引起的错误
+echo $(find ${SRCROOT} -name "AppIcon60x60@2x.png")
+echo "${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+</code></pre>
+
+<p>然后编译运行工程，你会在Xcode的<code>Report Navigator</code>（就是Xcode项目导航面板有着搜索、警告、断点那栏…）看到log出的信息。</p>
+
+<p>&emsp;&emsp;竟然知道了icon的输入和输出路径，在编译过程中对输入来的icon进行加工，再输出到目标路径就可以对icon进行替换了。</p>
+
+<h3>图片处理工具</h3>
+
+<p>&emsp;&emsp;这里用到的图片加工工具是ImageMagick。你可以通过Homebrew安装：<code>brew update</code>、<code>brew install ImageMagick</code>、<code>brew install ghostscript</code>。安装成功后，打开Terminal然后cd到你含有图片的一个目录下：</p>
+
+<pre><code>convert YourImageName.png -fill white -font Times-Bold -pointsize 18 -gravity south "Hello World" test.png
+</code></pre>
+
+<p>如果成功生成出了test.png，那么恭喜了！</p>
+
+<h3>用Shell来搞定这一切</h3>
+
+<p>我先贴上代码，然后再解释：</p>
+
+<pre><code>IFS=$'\n'
+buildNumber=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "${PROJECT_DIR}/${INFOPLIST_FILE}")
+versionNumber=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "${PROJECT_DIR}/${INFOPLIST_FILE}")
+#1
+PATH=${PATH}:/usr/local/bin
+#2
+function generateIcon () {
+    BASE_IMAGE_NAME=$1
+
+    TARGET_PATH="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${BASE_IMAGE_NAME}"
+    BASE_IMAGE_PATH=$(find ${SRCROOT} -name ${BASE_IMAGE_NAME})
+    #3
+    WIDTH=$(identify -format %w ${BASE_IMAGE_PATH})
+    FONT_SIZE=$(echo "$WIDTH * .15" | bc -l)
+    echo "font size $FONT_SIZE"
+    #4
+    if [ "${CONFIGURATION}" == "Debug" ]; then
+    #5
+    convert debugRibbon.png -resize ${WIDTH}x${WIDTH} resizedRibbon.png
+    convert -background '#0008' -fill white -gravity center -size ${WIDTH}x40\
+    -fill white -font Times-Boldr -pointsize ${FONT_SIZE} -gravity center caption:"${versionNumber}.${buildNumber}"\
+    ${BASE_IMAGE_PATH} +swap -gravity south -composite /tmp/temp.png
+    convert /tmp/temp.png resizedRibbon.png -composite ${TARGET_PATH}
+    fi
+
+}
+
+#6
+generateIcon "AppIcon60x60@2x.png"
+generateIcon "AppIcon60x60@3x.png"
+</code></pre>
+
+<p>1、添加/user/local/bin路径到PATH变量，Homebrew也是安装在该路径下的。这样才能执行得了ImageMagick的命令；
+2、以函数来接收不同设备的图片资源，作出分别的处理；
+3、identify作为ImageMagick的函数来获取图片的information，使用<code>-format %w</code>的到图片的宽；
+4、可以在Edit Scheme->Run->Info中指定CONFIGURATION；
+5、接下去就是把debugRibbon.png缩小，将build number和version number加到图片上，最后合成并输出；
+6、传入不同的icon文件名调用generateIcon。</p>
+
+<p>最终效果：</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/11458765/ae832a4c-9701-11e5-9a25-3d3a30099442.png" alt="alt tag" /></p>
+
+<p>debugRibbon.png：</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/11458863/c24d8a34-9703-11e5-8a9c-c301615f6dc5.png" alt="alt tag" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[如何在Objective-C的项目中使用Swift的第三方库]]></title>
@@ -328,7 +413,7 @@ t2 = CGAffineTransformRotate(t1, M_PI_2 );
     <link href="http://hawk0620.github.io/blog/2015/11/07/player-button/"/>
     <updated>2015-11-07T19:42:48+08:00</updated>
     <id>http://hawk0620.github.io/blog/2015/11/07/player-button</id>
-    <content type="html"><![CDATA[<p><img src="http://7xkwuq.com1.z0.glb.clouddn.com/player_button.gif" alt="alt tag" /></p>
+    <content type="html"><![CDATA[<p><img src="https://cloud.githubusercontent.com/assets/5633917/11263321/b48173c6-8ec4-11e5-8e66-5956767adc7d.gif" alt="alt tag" /></p>
 
 <p> 最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。</p>
 
