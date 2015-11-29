@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-30T01:47:26+08:00</updated>
+  <updated>2015-11-30T01:51:08+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -14,13 +14,13 @@
 
   
   <entry>
-    <title type="html"><![CDATA[如何在编译过程中改变APPIcon]]></title>
+    <title type="html"><![CDATA[如何在编译过程中改变app Icon]]></title>
     <link href="http://hawk0620.github.io/blog/2015/11/29/fun-with-app-icon/"/>
     <updated>2015-11-29T23:42:26+08:00</updated>
     <id>http://hawk0620.github.io/blog/2015/11/29/fun-with-app-icon</id>
     <content type="html"><![CDATA[<h3>为什么可以改变AppIcon</h3>
 
-<p>&emsp;&emsp;为了说明为什么可以改变，首先来点题外话。相信我们都知道怎么给app换icon——把图片拖进工程的Images.xcassets->AppIcon.appiconset，很明显app icon位于<code>Project Name/Images.xcassets/AppIcon.appiconset/xxx.png</code>。当我们<code>cmd+r</code>运行工程时，会生成一个<code>/User/username/Library/Developer/Xcode/.../.../Debug-iphoneos/Your Project Name.app</code>这样的路径，它包含了工程中所有的干货，当然app icons也在其中。</p>
+<p>&emsp;&emsp;为了说明为什么可以改变，首先来点题外话。相信我们都知道怎么给app换icon——把图片拖进工程的Images.xcassets->AppIcon.appiconset，很明显app icon位于<code>Project Name/Images.xcassets/AppIcon.appiconset/xxx.png</code>。当我们<code>cmd+r</code>运行工程时，会生成一个<code>/User/username/Library/Developer/.../Debug-iphoneos/Your Project Name.app</code>这样的路径，它包含了工程中所有的干货，当然app icons也在其中。</p>
 
 <!--more-->
 
@@ -81,12 +81,17 @@ generateIcon "AppIcon60x60@2x.png"
 generateIcon "AppIcon60x60@3x.png"
 </code></pre>
 
-<p>1、添加/user/local/bin路径到PATH变量，Homebrew也是安装在该路径下的。这样才能执行得了ImageMagick的命令；
-2、以函数来接收不同设备的图片资源，作出分别的处理；
-3、identify作为ImageMagick的函数来获取图片的information，使用<code>-format %w</code>的到图片的宽；
-4、可以在Edit Scheme->Run->Info中指定CONFIGURATION；
-5、接下去就是把debugRibbon.png缩小，将build number和version number加到图片上，最后合成并输出；
-6、传入不同的icon文件名调用generateIcon。</p>
+<p>1、添加/user/local/bin路径到PATH变量，Homebrew也是安装在该路径下的。这样才能执行得了ImageMagick的命令；</p>
+
+<p>2、以函数来接收不同设备的图片资源，作出分别的处理；</p>
+
+<p>3、identify作为ImageMagick的函数来获取图片的information，使用<code>-format %w</code>的到图片的宽；</p>
+
+<p>4、可以在Edit Scheme->Run->Info中指定CONFIGURATION；</p>
+
+<p>5、接下去就是把debugRibbon.png缩小，将build number和version number加到图片上，最后合成并输出；</p>
+
+<p>6、传入不同的icon文件名调用generateIcon。</p>
 
 <p>最终效果：</p>
 
