@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="为什么可以改变AppIcon &emsp;&emsp;为了说明为什么可以改变，首先来点题外话。相信我们都知道怎么给app换icon——把图片拖进工程的Images.xcassets->AppIcon.appiconset，很明显app icon位于Project Name/Images. &hellip;">
+  <meta name="description" content="NSOperation vs GCD &emsp;&emsp;如果对某个技术太执着，真的是件挺可怕的事情。在认识NSOperation之前，我单纯地以为GCD是多线程的不二法门，以致于只会无脑地： dispatch_async(dispatch_get_global_queue( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,59 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/12/21/nsoperation/">NSOperation初探</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-21T11:00:21+08:00" pubdate data-updated="true">Dec 21<sup>st</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>NSOperation vs GCD</h3>
+
+<p>&emsp;&emsp;如果对某个技术太执着，真的是件挺可怕的事情。在认识NSOperation之前，我单纯地以为GCD是多线程的不二法门，以致于只会无脑地：</p>
+
+<pre><code>dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+     // some handle
+     dispatch_sync(dispatch_get_main_queue(), ^{
+            // update ui
+     });      
+});
+</code></pre>
+
+<p>还有<code>dispatch_group_t</code>工作组，可以添加执行多个任务，通过<code>dispatch_group_notify</code>达到不阻塞的等待回调；<code>dispatch_source_t</code>轻易地监控许多诸如UNIX信号；<code>dispatch_barrier_async</code>解决恼人的读写问题等&hellip;</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/12/21/nsoperation/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -475,48 +528,9 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/daily-nsurlsession/">NSURLSession的日常</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T13:42:05+08:00" pubdate data-updated="true">Jul 27<sup>th</sup>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p> 在使用<code>NSURLSessionTaskDelegate</code>的时候，一开始并没有进入<code>URLSession:task:didCompleteWithError:</code>回调，阅读苹果给出的文档之后，成功解决。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/07/27/daily-nsurlsession/">阅读更多 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/posts/2">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -527,6 +541,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/12/21/nsoperation/">NSOperation初探</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/11/29/fun-with-app-icon/">如何在编译过程中改变app Icon</a>
@@ -542,10 +560,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/17/ios-play-video/">探索向～iOS视频播放</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/14/record-video-mirror/">iOS拍视频前置摄像头翻转的解决</a>
       </li>
     
   </ul>

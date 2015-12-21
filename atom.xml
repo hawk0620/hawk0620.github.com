@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-11-30T01:51:08+08:00</updated>
+  <updated>2015-12-21T16:29:26+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[NSOperation初探]]></title>
+    <link href="http://hawk0620.github.io/blog/2015/12/21/nsoperation/"/>
+    <updated>2015-12-21T11:00:21+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2015/12/21/nsoperation</id>
+    <content type="html"><![CDATA[<h3>NSOperation vs GCD</h3>
+
+<p>&emsp;&emsp;如果对某个技术太执着，真的是件挺可怕的事情。在认识NSOperation之前，我单纯地以为GCD是多线程的不二法门，以致于只会无脑地：</p>
+
+<pre><code>dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+     // some handle
+     dispatch_sync(dispatch_get_main_queue(), ^{
+            // update ui
+     });      
+});
+</code></pre>
+
+<p>还有<code>dispatch_group_t</code>工作组，可以添加执行多个任务，通过<code>dispatch_group_notify</code>达到不阻塞的等待回调；<code>dispatch_source_t</code>轻易地监控许多诸如UNIX信号；<code>dispatch_barrier_async</code>解决恼人的读写问题等&hellip;</p>
+
+<!--more-->
+
+
+<p>我甚至认为：<code>NSOperation</code>是苹果为了造福小白而开发出的高级API。但是落实到具体的场景中，怎么方便地取消一个任务，怎么设置任务之间的依赖，怎么暂停一个任务、然后再继续，怎么设置最大的并发任务数&hellip;所有的这些，用GCD实现起来太麻烦了，但是<code>NSOperation</code>和<code>NSOperationQueue</code>就胜任这种场景。当然了，并不是GCD就一无是处了，根据具体场景配合使用是最佳的实现方案。</p>
+
+<h3>NSOperation如何使用</h3>
+
+<p>&emsp;&emsp;<code>NSOperation</code>的使用挺像Java里的<code>Runnable</code>，需要子类化来实现。有两个子类化<code>NSOperation</code>的方法：</p>
+
+<p>1.重写main方法，这个方法的好处是简单，无需处理太多其它的状态值，只是不断地检测cancel状态：</p>
+
+<pre><code>if (self.isCancelled)
+     return;
+</code></pre>
+
+<p>最后，如果是通过delegate方式回调，需要在主线程回调出去：</p>
+
+<pre><code>[(NSObject *)self.delegate performSelectorOnMainThread:@selector(xxxxxDidFinish:) withObject:self waitUntilDone:NO];
+</code></pre>
+
+<p>再说说重写main方法的坏处，它不是并发的，会阻塞主线程，所以需要加入到<code>NSOperationQueue</code>，而且它的灵活性低，在main方法返回的时候，operation就结束了。</p>
+
+<p>2.比较推荐的是重写start方法，虽然会带来许多工作，比如KVO消息，但除了有较高的灵活性之外，它可以执行异步任务。</p>
+
+<pre><code>- (void)start {
+  @synchronized (self) {
+    if ([self isCancelled])
+    {
+        [self willChangeValueForKey:@"isFinished"];
+        self.finished = YES;
+        [self didChangeValueForKey:@"isFinished"];
+        return;
+    }
+
+    [self willChangeValueForKey:@"isExecuting"];
+    self.executing = YES;
+    [self didChangeValueForKey:@"isExecuting"];
+    // your handle
+    .....
+  } 
+}
+</code></pre>
+
+<p>然后在完成任务后（不管是fail还是finish），都需要再：</p>
+
+<pre><code>[self willChangeValueForKey:@"isFinished"];
+[self willChangeValueForKey:@"isExecuting"];
+
+self.executing = NO;
+self.finished = YES;
+
+[self didChangeValueForKey:@"isExecuting"];
+[self didChangeValueForKey:@"isFinished"];
+</code></pre>
+
+<p>处理的值，也可以通过block回调出去，所以建议有个类似这样的初始化方法：</p>
+
+<pre><code>- (id)initWithRequest:(NSURLRequest *)request 
+             progress:(DownloaderProgressBlock)progressBlock
+            completed:(DownloaderCompletedBlock)completedBlock
+            cancelled:(SDWebImageNoParamsBlock)cancelBlock
+</code></pre>
+
+<p>即使重写start方法的方式可以让任务异步，但还是推荐将operation加入到<code>NSOperationQueue</code>中，因为可以设置优先级，可以设置依赖等。</p>
+
+<p>全文完～</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[如何在编译过程中改变app Icon]]></title>
