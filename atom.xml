@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2015-12-21T16:29:26+08:00</updated>
+  <updated>2016-01-01T12:17:21+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,56 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[如何实现方形图片裁剪器]]></title>
+    <link href="http://hawk0620.github.io/blog/2016/01/01/crop-square-image/"/>
+    <updated>2016-01-01T11:03:07+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2016/01/01/crop-square-image</id>
+    <content type="html"><![CDATA[<h3>对微信方形图片裁剪器的剖析</h3>
+
+<p>&emsp;&emsp;我在做的一个兴趣项目时需要将图片裁剪成方形，联想到微信也有裁剪方形图片的功能。微信—-更换头像—-从相册选择这一流程中会要求用户将已选的图片裁剪成方形。其顺滑的移动缩放图片体验，可以判断出应该是<code>UIScorllView</code>实现而非通过<code>UIPinchGestureRecognizer</code>和<code>UIPanGestureRecognizer</code>组合实现的。因为<code>UIScorllView</code>有一个<code>viewForZoomingInScrollView</code>代理方法，该方法能实现对图片的缩放，所以使用<code>UIScorllView</code>可以满足需求。</p>
+
+<!--more-->
+
+
+<h3>开始动手实现方形图片裁剪器</h3>
+
+<p>&emsp;&emsp;有了以上的基础后，观察到在微信图片裁剪器中的图片是可以缩放到全屏的，即给我们很直观的感觉<code>UIScorllView</code>的<code>frame</code>应该是屏幕大小<code>CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)</code>。</p>
+
+<p>&emsp;&emsp;再创建好UIScrollView后加入UIImageView，<code>[self.scrollView addSubview:self.imageView];</code>，并且实现<code>UIScorllView</code>的代理方法。运行程序后，我发现UIImageView不会以屏幕中间的方形框作为移动边界，而是以屏幕作为移动的边界。想想也对，因为我把<code>UIScorllView</code>的<code>frame</code>设置为屏幕了。。。</p>
+
+<p>&emsp;&emsp;这个时候我基本明白了<code>UIScorllView</code>的<code>frame</code>必须得是在屏幕中间的方形。在一番修改之后，我发现了基本上移动边界的问题解决了（下面会说没瑕疵是啥）。可是由于<code>UIScorllView</code>的<code>frame</code>不是全屏了，随之带来的问题是缩放或者移动的<code>UIImageView</code>超过了<code>UIScorllView</code>的<code>frame</code>就显示不了了。难道我又想错了吗？其实不然，不是还有个<code>clipsToBounds</code>属性嘛。</p>
+
+<p>&emsp;&emsp;剩下的工作只有居中初次进入裁剪页面<code>UIImageView</code>，那么就居中<code>UIImageView</code>：</p>
+
+<pre><code>self.imageView.center = CGPointMake(self.view.bounds.size.width/2.0, CGRectGetMidY(self.scrollView.frame) - CGRectGetMinY(self.scrollView.frame));
+</code></pre>
+
+<p>并且设置<code>UIScrollView</code>的<code>contentSize</code>:</p>
+
+<pre><code>self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+</code></pre>
+
+<p>&emsp;&emsp;这时终于可以长舒一口气了吧～编译运行：</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/12069698/efbacbd6-b07f-11e5-8cd4-4c28b796920e.png" alt="dd" /></p>
+
+<p>发现当图片的高度大于屏幕宽度时，<code>UIScrollView</code>的移动边界会出现图片顶端无法下移，而底端上移太多的问题。这时想起了<code>contentOffset</code>属性来设置高度大于宽度图片的居中位置：</p>
+
+<pre><code>if (self.imageView.bounds.size.height &gt; viewWidth) {
+    self.scrollView.contentOffset = CGPointMake(0, (self.imageView.frame.size.height - viewWidth)/2.0);
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, self.imageView.bounds.size.height);
+
+} else {
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+    self.imageView.center = CGPointMake(viewWidth/2.0, CGRectGetMidY(self.scrollView.frame) - CGRectGetMinY(self.scrollView.frame));
+}
+</code></pre>
+
+<p>大功告成！一个看似不复杂的图片裁剪器，里面却暗藏了许多小技巧。最后附上<a href="https://github.com/hawk0620/SquareCropDemo">源码链接</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[NSOperation初探]]></title>

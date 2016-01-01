@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content=" 在使用NSURLSessionTaskDelegate的时候，一开始并没有进入URLSession:task:didCompleteWithError:回调，阅读苹果给出的文档之后，成功解决。 ">
+  <meta name="description" content=" 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过GCD来帮助我们实现。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,6 +71,47 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/09/20/dispatch-semaphore/">GCD(semaphore)的日常</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/09/20/dispatch-semaphore/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/07/27/daily-nsurlsession/">NSURLSession的日常</a></h1>
     
     
@@ -122,6 +163,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/01/crop-square-image/">如何实现方形图片裁剪器</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/21/nsoperation/">NSOperation初探</a>
       </li>
     
@@ -137,10 +182,6 @@
         <a href="/blog/2015/11/21/daymic-tableview-height/">AutoLayout实现的动态TableView高度</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/11/17/ios-play-video/">探索向～iOS视频播放</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -154,7 +195,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Hawk0620 -
+  Copyright &copy; 2016 - Hawk0620 -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
