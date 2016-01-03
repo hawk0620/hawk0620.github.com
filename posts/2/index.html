@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content=" 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过GCD来帮助我们实现。 ">
+  <meta name="description" content="在之前的一个app中，因为对多线程同步的处理不够好，在某些极端情况下app会发生crash。本文简单介绍一下如何使用@synchronized指令来实现线程安全。苹果文档中对@synchronized指令的说明是： 1.@synchronized指令是Objective- &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,58 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/">iOS 线程同步: @synchronized指令</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-02T07:59:59+08:00" pubdate data-updated="true">Jun 2<sup>nd</sup>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p> 在之前的一个app中，因为对多线程同步的处理不够好，在某些极端情况下app会发生crash。本文简单介绍一下如何使用<code>@synchronized</code>指令来实现线程安全。苹果文档中对<code>@synchronized</code>指令的说明是：</p>
+
+<p>1.<code>@synchronized</code>指令是Objective-C代码中快捷创建互斥锁的一种方式；</p>
+
+<p>2.<code>@synchronized</code>指令像任何其他的互斥锁一样，防止同一时间不同的线程获取相同的锁。</p>
+
+<p><code>@synchronized</code>指令的使用很简单，只需要传一个参数即可：</p>
+
+<pre><code>@synchronized(key) { 
+    // thread-safe code goes here 
+}
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -163,6 +215,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/03/2015booklist/">2015年我读过的几本书</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/01/crop-square-image/">如何实现方形图片裁剪器</a>
       </li>
     
@@ -176,10 +232,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/23/how-to-import-swift-into-objc/">如何在Objective-C的项目中使用Swift的第三方库</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/21/daymic-tableview-height/">AutoLayout实现的动态TableView高度</a>
       </li>
     
   </ul>
