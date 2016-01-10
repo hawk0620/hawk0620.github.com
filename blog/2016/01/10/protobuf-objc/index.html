@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>GCD(semaphore)的日常 - 陈浩的技术博客</title>
+  <title>Objective-C序列化库protobuf的安装 - 陈浩的技术博客</title>
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过GCD来帮助我们实现。 dispatch_semaphore简介 dispatch_semaphore_create创建一个带初始值的semaphore； &hellip;">
+  <meta name="description" content="&emsp;&emsp;protobuf是google开源的二进制序列化库，对网络传输或是流量有较高要求的移动应用可以使用二进制协议，而非文本协议，这时protobuf将是不错的选择。 &emsp;&emsp;下面简单介绍下Mac系统下Objective-C语言的protobuf的安装： 1、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore">
+  <link rel="canonical" href="http://hawk0620.github.io/blog/2016/01/10/protobuf-objc">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">GCD(semaphore)的日常</h1>
+      <h1 class="entry-title">Objective-C序列化库protobuf的安装</h1>
     
     
       <p class="meta">
@@ -84,37 +84,58 @@
   
 
 
-<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+<time datetime="2016-01-10T17:59:29+08:00" pubdate data-updated="true">Jan 10<sup>th</sup>, 2016</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
+<div class="entry-content"><p>&emsp;&emsp;protobuf是google开源的二进制序列化库，对网络传输或是流量有较高要求的移动应用可以使用二进制协议，而非文本协议，这时protobuf将是不错的选择。</p>
 
 <!--more-->
 
 
-<h3>dispatch_semaphore简介</h3>
+<p>&emsp;&emsp;下面简单介绍下Mac系统下Objective-C语言的protobuf的安装：</p>
 
-<p> <code>dispatch_semaphore_create</code>创建一个带初始值的semaphore；</p>
+<p>1、在<a href="https://github.com/google/protobuf/releases">protobuf</a>下载面向Objective-C的protobuf库</p>
 
-<p> <code>dispatch_semaphore_signal</code>增加semaphore的计数，并发送semaphore信号；</p>
+<p>2、cd到下载的目录，执行<code>./autogen.sh</code></p>
 
-<p> <code>dispatch_semaphore_wait</code>减少semaphore的计数，并等待semaphore信号的到达。</p>
+<p>3、再依次执行</p>
 
-<p> 示例代码：</p>
-
-<pre><code>dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-
-[self singleBlock:^(id param){
-    // your codes...
-    dispatch_semaphore_signal(sem);
-}];
-
-dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+<pre><code>$ ./configure
+$ make
+$ make check
+$ sudo make install
+$ sudo ldconfig # refresh shared library cache.        
 </code></pre>
+
+<p>4、再执行<code>objectivec/DevTools/full_mac_build.sh</code>，执行完后会看到src目录下生成了protoc二进制文件</p>
+
+<p>PS:如果执行过程遇到了</p>
+
+<pre><code>native:
+     [exec] xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance
+</code></pre>
+
+<p>可能是Xcode只有command line tools，而没有完整的Xcode UI，执行：
+<code>brew install autoconf automake libtool gettext</code>即可。</p>
+
+<p>5、如果一切顺利，那就恭喜你了，接下来可是收获的时刻了。我在src目录里创建了一个Person.proto的文件，并将以下内容拷贝进去：</p>
+
+<pre><code>syntax = "proto2";
+
+message Person {
+  required string name = 1;
+  required int32 id = 2;
+  optional string email = 3;
+}
+</code></pre>
+
+<p>注意：需要指明proto的语法规则是proto2还是proto3。</p>
+
+<p>6、我在src目录下还创建了bulid/gen这样的目录，最后我在src目录的位置执行<code>protoc --proto_path=../src --objc_out=../src/build/gen ../src/Person.proto</code>，然后去bulid/gen/下找到你心仪的文件拖进项目使用吧（项目得引入了objc版的protobuf）。</p>
 </div>
 
 
@@ -137,7 +158,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
   
 
 
-<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+<time datetime="2016-01-10T17:59:29+08:00" pubdate data-updated="true">Jan 10<sup>th</sup>, 2016</time>
       
 
 
@@ -152,10 +173,8 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/07/27/daily-nsurlsession/" title="Previous Post: NSURLSession的日常">&laquo; NSURLSession的日常</a>
+        <a class="basic-alignment left" href="/blog/2016/01/03/2015booklist/" title="Previous Post: 2015年我读过的几本书">&laquo; 2015年我读过的几本书</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/" title="Next Post: iOS 线程同步: @synchronized指令">iOS 线程同步: @synchronized指令 &raquo;</a>
       
     </p>
   </footer>
