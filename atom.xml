@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2016-01-10T19:34:08+08:00</updated>
+  <updated>2016-03-02T13:54:02+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,30 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[谈谈%@可以格式怎样的NSInteger]]></title>
+    <link href="http://hawk0620.github.io/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger/"/>
+    <updated>2016-03-01T16:25:26+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger</id>
+    <content type="html"><![CDATA[<p>&emsp;&emsp;在荔枝面试时遇到一个这样的问题，age是NSInteger类型，</p>
+
+<pre><code>UILabel *mylabel=[UILabel new]; 
+mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
+</code></pre>
+
+<p>以上的代码编译通过，运行可能crash？</p>
+
+<p>&emsp;&emsp;问题本身很容易答出，无非是NSInteger是基本类型，%@格式化的是Objective-C对象。所以运行时就会crash。但是面试官提出了一个这样的问题：当age是什么值时，运行不会crash？</p>
+
+<!--more-->
+
+
+<p>&emsp;&emsp;我当时没能答出来，回家后思考验证了一番，发现当age=0的时候，运行就不会crash。为什么age=0时，不会crash呢？%@的作用是格式Objective-C对象，也即是一个指针类型，就是说0代表的是个指针类型。用<code>NSLog(@"%p", 0);</code>打印结果是0x0，所以就不会出现crash。原来c语言定义了整型常量0可以转换成null指针，但不意味着null指针指向0x0的地址，而仅仅是字面量0转换成指针时会变成null指针。在C语言中，null和0的值是一样的，只是null用于指针和对象，0用于数值。</p>
+
+<p>&emsp;&emsp;到这里也算是介绍完了，既然话匣子打开了，就顺便再说说荔枝的另一个题目。一个长度n的数组，其中有个元素的出现次数大于n>>1，求出这个元素（时间复杂度n，空间复杂度1）。由于面试时的紧张，我当时只想到了排序后的求解，并不是最优解。后来也是在家中想出了一个好的解法：只需遍历一遍数组，用一个key是元素，value是出现次数的字典，当没有匹配到key时，将元素作为key，value为1插入，当匹配到key的时候，将value取出加1再赋给key，并比较value的值是不是>2/n了。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Objective-C序列化库protobuf的安装]]></title>

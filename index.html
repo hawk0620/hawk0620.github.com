@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="&emsp;&emsp;protobuf是google开源的二进制序列化库，对网络传输或是流量有较高要求的移动应用可以使用二进制协议，而非文本协议，这时protobuf将是不错的选择。 ">
+  <meta name="description" content="&emsp;&emsp;在荔枝面试时遇到一个这样的问题，age是NSInteger类型， UILabel *mylabel=[UILabel new]; mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@""; 以上的代码编译通过， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger/">谈谈%@可以格式怎样的NSInteger</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-01T16:25:26+08:00" pubdate data-updated="true">Mar 1<sup>st</sup>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&emsp;&emsp;在荔枝面试时遇到一个这样的问题，age是NSInteger类型，</p>
+
+<pre><code>UILabel *mylabel=[UILabel new]; 
+mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
+</code></pre>
+
+<p>以上的代码编译通过，运行可能crash？</p>
+
+<p>&emsp;&emsp;问题本身很容易答出，无非是NSInteger是基本类型，%@格式化的是Objective-C对象。所以运行时就会crash。但是面试官提出了一个这样的问题：当age是什么值时，运行不会crash？</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -476,49 +525,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/07/player-button/">用CoreAnimation实现的播放按钮</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-07T19:42:48+08:00" pubdate data-updated="true">Nov 7<sup>th</sup>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="https://cloud.githubusercontent.com/assets/5633917/11263321/b48173c6-8ec4-11e5-8e66-5956767adc7d.gif" alt="alt tag" /></p>
-
-<p> 最近做视频播放，需要做一个表示视频正在播放的按钮效果。记录一下实现这功能的经历。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/11/07/player-button/">阅读更多 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -534,6 +540,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger/">谈谈%@可以格式怎样的NSInteger</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/10/protobuf-objc/">Objective-C序列化库protobuf的安装</a>
       </li>
     
@@ -547,10 +557,6 @@
     
       <li class="post">
         <a href="/blog/2015/12/21/nsoperation/">NSOperation初探</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/29/fun-with-app-icon/">如何在编译过程中改变app Icon</a>
       </li>
     
   </ul>
