@@ -9,7 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="&emsp;&emsp;在荔枝面试时遇到一个这样的问题，age是NSInteger类型， UILabel *mylabel=[UILabel new]; mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@""; 以上的代码编译通过， &hellip;">
+  <meta name="description" content="&emsp;&emsp;iOS可以通过CADisplayLink实现自定义动画引擎，pop就是基于此实现的，而且比原生Core Animation更强大好用。譬如当ViewController侧滑返回的时候，系统会将Core Animation的动画会停止， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/30/talk-with-pop/">聊聊动画引擎pop</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-30T23:51:12+08:00" pubdate data-updated="true">Apr 30<sup>th</sup>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&emsp;&emsp;iOS可以通过CADisplayLink实现自定义动画引擎，pop就是基于此实现的，而且比原生Core Animation更强大好用。譬如当ViewController侧滑返回的时候，系统会将Core Animation的动画会停止，而基于CADisplayLink实现的动画则不会停止，因而可以实现类似网易云音乐从播放页侧滑时hold住专辑封面图旋转的效果。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/04/30/talk-with-pop/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -479,52 +520,6 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/14/record-video-mirror/">iOS拍视频前置摄像头翻转的解决</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-14T10:18:42+08:00" pubdate data-updated="true">Nov 14<sup>th</sup>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>前不久在做iOS录制视频遇到了前置摄像头录制的时候视频翻转的问题，相比起以前我做拍照的翻转仅仅只需简单的把图片位置纠正：</p>
-
-<pre><code>UIImage *newImage = [UIImage imageWithCGImage:[image CGImage] scale:1 orientation:UIImageOrientationLeftMirrored];
-</code></pre>
-
-<p>视频的翻转就比较麻烦，其大致思路是通过<code>CGAffineTransform</code>变换调整视频在屏幕中的位置，再使用<code>AVMutableVideoComposition</code>进行视频的重新组成，最后使用<code>AVAssetExportSession</code>进行视频的导出即可，以下是翻转以及裁剪出方形视频的代码：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/11/14/record-video-mirror/">阅读更多 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -540,6 +535,10 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/30/talk-with-pop/">聊聊动画引擎pop</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger/">谈谈%@可以格式怎样的NSInteger</a>
       </li>
     
@@ -553,10 +552,6 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
     
       <li class="post">
         <a href="/blog/2016/01/01/crop-square-image/">如何实现方形图片裁剪器</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/21/nsoperation/">NSOperation初探</a>
       </li>
     
   </ul>
