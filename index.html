@@ -9,7 +9,8 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="&emsp;&emsp;iOS可以通过CADisplayLink实现自定义动画引擎，pop就是基于此实现的，而且比原生Core Animation更强大好用。譬如当ViewController侧滑返回的时候，系统会将Core Animation的动画会停止， &hellip;">
+  <meta name="description" content="&emsp;&emsp;引起UITableView卡顿比较常见的原因有cell的层级过多、cell中有触发离屏渲染的代码（譬如：cornerRadius、maskToBounds
+同时使用）、像素是否对齐、是否使用UITableView自动计算cell高度的方法等。本文将从cell层级出发， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +66,48 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/07/10/feed-cell/">以仿朋友圈为例谈谈保持UITableView顺滑的技巧</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-07-10T09:07:03+08:00" pubdate data-updated="true">Jul 10<sup>th</sup>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&emsp;&emsp;引起UITableView卡顿比较常见的原因有cell的层级过多、cell中有触发离屏渲染的代码（譬如：cornerRadius、maskToBounds
+同时使用）、像素是否对齐、是否使用UITableView自动计算cell高度的方法等。本文将从cell层级出发，以一个仿朋友圈的demo来讲述如何让列表保持顺滑，项目的源码可在文末获得。不可否认的是，过早的优化是魔鬼，请在项目出现性能瓶颈再考虑优化。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/07/10/feed-cell/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -473,53 +516,6 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/17/ios-play-video/">探索向～iOS视频播放</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-17T21:50:18+08:00" pubdate data-updated="true">Nov 17<sup>th</sup>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>从体验说起</h4>
-
-<p>&emsp;&emsp;对比微信和Instagram可以发现播放视频的两个思路：微信的处理是把视频加载好后播放，这样确保了视频是完整的，用户很直观视频是否下载完成，不影响用户观看视频的体验；而Instagram的做法是边加载边播，当网络不给力的时候，视频就卡在那里，给用户增加了观看视频的焦虑，并且用户还得自己判断下视频是不是加载完成了，最不幸的是，当视频的网络请求不可达时，不能给出加载失败的提示引导用户重新加载，只能滑动列表触发刷新。</p>
-
-<h4>播放视频的实现</h4>
-
-<p>1、通过实践，我发现Instagram采用的应该是<code>AVPlayer</code>实现的。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/11/17/ios-play-video/">阅读更多 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -535,6 +531,10 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/07/10/feed-cell/">以仿朋友圈为例谈谈保持UITableView顺滑的技巧</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/04/30/talk-with-pop/">聊聊动画引擎pop</a>
       </li>
     
@@ -548,10 +548,6 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
     
       <li class="post">
         <a href="/blog/2016/01/03/2015booklist/">2015年我读过的几本书</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/01/01/crop-square-image/">如何实现方形图片裁剪器</a>
       </li>
     
   </ul>

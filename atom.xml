@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2016-05-01T00:26:26+08:00</updated>
+  <updated>2016-07-10T15:44:12+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,437 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[以仿朋友圈为例谈谈保持UITableView顺滑的技巧]]></title>
+    <link href="http://hawk0620.github.io/blog/2016/07/10/feed-cell/"/>
+    <updated>2016-07-10T09:07:03+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2016/07/10/feed-cell</id>
+    <content type="html"><![CDATA[<p>&emsp;&emsp;引起UITableView卡顿比较常见的原因有cell的层级过多、cell中有触发离屏渲染的代码（譬如：cornerRadius、maskToBounds
+同时使用）、像素是否对齐、是否使用UITableView自动计算cell高度的方法等。本文将从cell层级出发，以一个仿朋友圈的demo来讲述如何让列表保持顺滑，项目的源码可在文末获得。不可否认的是，过早的优化是魔鬼，请在项目出现性能瓶颈再考虑优化。</p>
+
+<!--more-->
+
+
+<p>首先看看reveal上页面层级的效果图</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/16711988/2b08a274-46aa-11e6-9936-79cbdcaf3869.png" alt="" /></p>
+
+<p>然后是9.3系统iPhone5的真机效果</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/16712261/506d7242-46b4-11e6-9bad-6b4a5d05c0a5.gif" alt="" /></p>
+
+<h4>1、绘制文本</h4>
+
+<p>&emsp;&emsp;使用core text可以将文本绘制在一个<code>CGContextRef</code>上，最后再通过<code>UIGraphicsGetImageFromCurrentImageContext()</code>生成图片，再将图片赋值给<code>cell.contentView.layer</code>，从而达到减少cell层级的目的。</p>
+
+<p>绘制普通文本（譬如用户昵称）在context上，相关注释在代码里：</p>
+
+<pre><code>- (void)drawInContext:(CGContextRef)context withPosition:(CGPoint)p andFont:(UIFont *)font andTextColor:(UIColor *)color andHeight:(float)height andWidth:(float)width lineBreakMode:(CTLineBreakMode)lineBreakMode {
+    CGSize size = CGSizeMake(width, height);
+    // 翻转坐标系
+    CGContextSetTextMatrix(context,CGAffineTransformIdentity);
+    CGContextTranslateCTM(context,0,height);
+    CGContextScaleCTM(context,1.0,-1.0);
+
+    NSMutableDictionary * attributes = [StringAttributes attributeFont:font andTextColor:color lineBreakMode:lineBreakMode];
+
+    // 创建绘制区域（路径）
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path,NULL,CGRectMake(p.x, height-p.y-size.height,(size.width),(size.height)));
+
+    // 创建AttributedString
+    NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:self attributes:attributes];
+    CFAttributedStringRef attributedString = (__bridge CFAttributedStringRef)attributedStr;
+
+    // 绘制frame
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attributedString);
+    CTFrameRef ctframe = CTFramesetterCreateFrame(framesetter, CFRangeMake(0,0),path,NULL);
+    CTFrameDraw(ctframe,context);
+    CGPathRelease(path);
+    CFRelease(framesetter);
+    CFRelease(ctframe);
+    [[attributedStr mutableString] setString:@""];
+    CGContextSetTextMatrix(context,CGAffineTransformIdentity);
+    CGContextTranslateCTM(context,0, height);
+    CGContextScaleCTM(context,1.0,-1.0);
+}
+</code></pre>
+
+<p>绘制朋友圈内容文本（带链接）在context上，这里我还没有去实现文本多了会折叠的效果，与上面普通文本不同的是这里需要创建带链接的AttributeString和CTLineRef的逐行绘制：</p>
+
+<pre><code>- (NSMutableAttributedString *)highlightText:(NSMutableAttributedString *)coloredString{
+    // 创建带高亮的AttributedString
+    NSString* string = coloredString.string;
+    NSRange range = NSMakeRange(0,[string length]);
+    NSDataDetector *linkDetector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:nil];
+    NSArray *matches = [linkDetector matchesInString:string options:0 range:range];
+
+    for(NSTextCheckingResult* match in matches) {
+        [self.ranges addObject:NSStringFromRange(match.range)];
+        UIColor *highlightColor = UIColorFromRGB(0x297bc1);
+        [coloredString addAttribute:(NSString*)kCTForegroundColorAttributeName
+                              value:(id)highlightColor.CGColor range:match.range];
+    }
+
+    return coloredString;
+}
+
+- (void)drawFramesetter:(CTFramesetterRef)framesetter
+       attributedString:(NSAttributedString *)attributedString
+              textRange:(CFRange)textRange
+                 inRect:(CGRect)rect
+                context:(CGContextRef)c {
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, rect);
+    CTFrameRef frame = CTFramesetterCreateFrame(framesetter, textRange, path, NULL);
+
+    CGFloat ContentHeight = CGRectGetHeight(rect);
+    CFArrayRef lines = CTFrameGetLines(frame);
+    NSInteger numberOfLines = CFArrayGetCount(lines);
+
+    CGPoint lineOrigins[numberOfLines];
+    CTFrameGetLineOrigins(frame, CFRangeMake(0, numberOfLines), lineOrigins);
+
+    // 遍历每一行
+    for (CFIndex lineIndex = 0; lineIndex &lt; numberOfLines; lineIndex++) {
+        CGPoint lineOrigin = lineOrigins[lineIndex];
+        CTLineRef line = CFArrayGetValueAtIndex(lines, lineIndex);
+
+        CGFloat descent = 0.0f, ascent = 0.0f, lineLeading = 0.0f;
+        CTLineGetTypographicBounds((CTLineRef)line, &amp;ascent, &amp;descent, &amp;lineLeading);
+
+        CGFloat penOffset = (CGFloat)CTLineGetPenOffsetForFlush(line, NSTextAlignmentLeft, rect.size.width);
+        CGFloat y = lineOrigin.y - descent - self.font.descender;
+
+        // 设置每一行位置
+        CGContextSetTextPosition(c, penOffset + self.xOffset, y - self.yOffset);
+        CTLineDraw(line, c);
+
+        // CTRunRef同一行中文本的不同样式，包括颜色、字体等，此处用途为处理链接高亮
+        CFArrayRef runs = CTLineGetGlyphRuns(line);
+        for (int j = 0; j &lt; CFArrayGetCount(runs); j++) {
+            CGFloat runAscent, runDescent, lineLeading1;
+
+            CTRunRef run = CFArrayGetValueAtIndex(runs, j);
+            NSDictionary *attributes = (__bridge NSDictionary*)CTRunGetAttributes(run);
+            // 判断是不是链接
+            if (!CGColorEqualToColor((__bridge CGColorRef)([attributes valueForKey:@"CTForegroundColor"]), self.textColor.CGColor)) {
+                CFRange range = CTRunGetStringRange(run);
+                float offset = CTLineGetOffsetForStringIndex(line, range.location, NULL);
+
+                // 得到链接的CGRect
+                CGRect runRect;
+                runRect.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0,0), &amp;runAscent, &amp;runDescent, &amp;lineLeading1);
+                runRect.size.height = self.font.lineHeight;
+                runRect.origin.x = lineOrigin.x + offset+ self.xOffset;
+                runRect.origin.y = lineOrigin.y;
+                runRect.origin.y -= descent + self.yOffset;
+
+                // 因为坐标系被翻转，链接正常的坐标需要通过CGAffineTransform计算得到
+                CGAffineTransform transform = CGAffineTransformMakeTranslation(0, ContentHeight);
+                transform = CGAffineTransformScale(transform, 1.f, -1.f);
+                CGRect flipRect = CGRectApplyAffineTransform(runRect, transform);
+
+                // 保存是链接的CGRect
+                NSRange nRange = NSMakeRange(range.location, range.length);
+                self.framesDict[NSStringFromRange(nRange)] = [NSValue valueWithCGRect:flipRect];
+
+                // 保存同一条链接的不同CGRect，用于点击时背景色处理
+                for (NSString *rangeString in self.ranges) {
+                    NSRange range = NSRangeFromString(rangeString);
+                    if (NSLocationInRange(nRange.location, range)) {
+                        NSMutableArray *array = self.relationDict[rangeString];
+                        if (array) {
+                            [array addObject:NSStringFromCGRect(flipRect)];
+                            self.relationDict[rangeString] = array;
+                        } else {
+                            self.relationDict[rangeString] = [NSMutableArray arrayWithObject:NSStringFromCGRect(flipRect)];
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    CFRelease(frame);
+    CFRelease(path);
+}
+</code></pre>
+
+<p>上述方法运用起来就是：</p>
+
+<pre><code>- (void)fillData:(CGContextRef)context {
+    [self.nickname drawInContext:context withPosition:(CGPoint){kTextXOffset, kSpec} andFont:kNicknameFont
+                    andTextColor:UIColorFromRGB(0x556c95) andHeight:self.nicknameSize.height
+                        andWidth:self.nicknameSize.width lineBreakMode:kCTLineBreakByTruncatingTail];
+    [self.drawer setText:self.contentString context:context contentSize:self.contentSize
+         backgroundColor:[UIColor whiteColor] font:kContentTextFont textColor:[UIColor blackColor]
+                   block:nil xOffset:kTextXOffset yOffset:kSpec * 2 + self.nicknameSize.height];
+}
+
+- (void)fillContents:(NSArray *)array {
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(self.size.width, self.size.height), YES, 0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    [UIColorFromRGB(0xffffff) set];
+    CGContextFillRect(context, CGRectMake(0, 0, self.size.width, self.size.height));
+
+    // 获取需要高亮的链接CGRect，并填充背景色
+    if (array) {
+        for (NSString *string in array) {
+            CGRect rect = CGRectFromString(string);
+            [UIColorFromRGB(0xe5e5e5) set];
+            CGContextFillRect(context, rect);
+        }
+    }
+
+    [self fillData:context];
+
+    UIImage *temp = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    self.contentView.layer.contents = (__bridge id _Nullable)(temp.CGImage);
+}
+</code></pre>
+
+<p>这样就完成了文本的显示。</p>
+
+<h4>2、显示图片</h4>
+
+<p>&emsp;&emsp;图片包括用户头像和朋友圈的内容，这里只是将CALayer添加到contentView.layer上，具体做法是继承了CALayer，实现部分功能。</p>
+
+<p>通过链接显示图片：</p>
+
+<pre><code>- (void)setContentsWithURLString:(NSString *)urlString {
+
+    self.contents = (__bridge id _Nullable)([UIImage imageNamed:@"placeholder"].CGImage);
+    @weakify(self)
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    [manager downloadImageWithURL:[NSURL URLWithString:urlString]
+                          options:SDWebImageCacheMemoryOnly
+                         progress:nil
+                        completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                            if (image) {
+                                @strongify(self)
+                                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                                    if (!_observer) {
+
+                                        _observer = CFRunLoopObserverCreateWithHandler(kCFAllocatorDefault, kCFRunLoopBeforeWaiting | kCFRunLoopExit, false, POPAnimationApplyRunLoopOrder, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
+                                            self.contents = (__bridge id _Nullable)(image.CGImage);
+                                        });
+
+                                        if (_observer) {
+                                            CFRunLoopAddObserver(CFRunLoopGetMain(), _observer,  kCFRunLoopCommonModes);
+                                        }
+                                    }
+                                });
+                                self.originImage = image;
+                            }
+                        }];
+}
+</code></pre>
+
+<p>其他比较简单就不展开。</p>
+
+<h4>3、显示小视频</h4>
+
+<p>&emsp;&emsp;之前的一篇文章简单讲了怎么自己做一个播放器，这里就派上用场了。而显示小视频封面图片的CALayer同样在显示小视频的时候可以复用。</p>
+
+<p>这里使用了<code>NSOperationQueue</code>来保障播放视频的流畅性，具体继承<code>NSOperation</code>的<code>VideoDecodeOperation</code>相关代码如下：</p>
+
+<pre><code>- (void)main {
+
+    @autoreleasepool {
+
+        if (self.isCancelled) {
+            _newVideoFrameBlock = nil;
+            _decodeFinishedBlock = nil;
+            return;
+        }
+
+        AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[[NSURL alloc] initFileURLWithPath:self.filePath] options:nil];
+        NSError *error;
+        AVAssetReader* reader = [[AVAssetReader alloc] initWithAsset:asset error:&amp;error];
+        if (error) {
+            return;
+        }
+
+        NSArray* videoTracks = [asset tracksWithMediaType:AVMediaTypeVideo];
+        AVAssetTrack* videoTrack = [videoTracks objectAtIndex:0];
+        // 视频播放时，m_pixelFormatType=kCVPixelFormatType_32BGRA
+        // 其他用途，如视频压缩，m_pixelFormatType=kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        int m_pixelFormatType = kCVPixelFormatType_32BGRA;
+        NSDictionary* options = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt: (int)m_pixelFormatType]
+                                                            forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        AVAssetReaderTrackOutput* videoReaderOutput = [[AVAssetReaderTrackOutput alloc]
+                initWithTrack:videoTrack outputSettings:options];
+        [reader addOutput:videoReaderOutput];
+        [reader startReading];
+        // 要确保nominalFrameRate&gt;0，之前出现过android拍的0帧视频
+        if (self.isCancelled) {
+            _newVideoFrameBlock = nil;
+            _decodeFinishedBlock = nil;
+            return;
+        }
+
+        while ([reader status] == AVAssetReaderStatusReading &amp;&amp; videoTrack.nominalFrameRate &gt; 0) {
+            if (self.isCancelled) {
+                _newVideoFrameBlock = nil;
+                _decodeFinishedBlock = nil;
+                return;
+            }
+
+            CMSampleBufferRef sampleBuffer = [videoReaderOutput copyNextSampleBuffer];
+            CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+
+            // Lock the base address of the pixel buffer
+            CVPixelBufferLockBaseAddress(imageBuffer, 0);
+
+            // Get the number of bytes per row for the pixel buffer
+            size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+
+            // Get the pixel buffer width and height
+            size_t width = CVPixelBufferGetWidth(imageBuffer);
+            size_t height = CVPixelBufferGetHeight(imageBuffer);
+
+            //Generate image to edit`
+            unsigned char* pixel = (unsigned char *)CVPixelBufferGetBaseAddress(imageBuffer);
+
+            CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+            CGContextRef context=CGBitmapContextCreate(pixel, width, height, 8, bytesPerRow, colorSpace,
+                                                       kCGBitmapByteOrder32Little|kCGImageAlphaPremultipliedFirst);
+            if (context != NULL) {
+                CGImageRef imageRef = CGBitmapContextCreateImage(context);
+
+                CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+                CGColorSpaceRelease(colorSpace);
+                CGContextRelease(context);
+
+                // 解码图片
+                size_t width = CGImageGetWidth(imageRef);
+                size_t height = CGImageGetHeight(imageRef);
+                size_t bitsPerComponent = CGImageGetBitsPerComponent(imageRef);
+
+                // CGImageGetBytesPerRow() calculates incorrectly in iOS 5.0, so defer to CGBitmapContextCreate
+                size_t bytesPerRow = 0;
+                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                CGColorSpaceModel colorSpaceModel = CGColorSpaceGetModel(colorSpace);
+                CGBitmapInfo bitmapInfo = CGImageGetBitmapInfo(imageRef);
+
+                if (colorSpaceModel == kCGColorSpaceModelRGB) {
+                    uint32_t alpha = (bitmapInfo &amp; kCGBitmapAlphaInfoMask);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wassign-enum"
+                    if (alpha == kCGImageAlphaNone) {
+                        bitmapInfo &amp;= ~kCGBitmapAlphaInfoMask;
+                        bitmapInfo |= kCGImageAlphaNoneSkipFirst;
+                    } else if (!(alpha == kCGImageAlphaNoneSkipFirst || alpha == kCGImageAlphaNoneSkipLast)) {
+                        bitmapInfo &amp;= ~kCGBitmapAlphaInfoMask;
+                        bitmapInfo |= kCGImageAlphaPremultipliedFirst;
+                    }
+#pragma clang diagnostic pop
+                }
+
+                CGContextRef context = CGBitmapContextCreate(NULL, width, height, bitsPerComponent,
+                                                             bytesPerRow, colorSpace, bitmapInfo);
+
+                CGColorSpaceRelease(colorSpace);
+
+                if (!context) {
+                    if (self.newVideoFrameBlock) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            if (self.isCancelled) {
+                                _newVideoFrameBlock = nil;
+                                _decodeFinishedBlock = nil;
+                                return;
+                            }
+                            self.newVideoFrameBlock(imageRef, self.filePath);
+                            CGImageRelease(imageRef);
+                        });
+                    }
+                } else {
+
+                    CGContextDrawImage(context, CGRectMake(0.0f, 0.0f, width, height), imageRef);
+                    CGImageRef inflatedImageRef = CGBitmapContextCreateImage(context);
+
+                    CGContextRelease(context);
+                    if (self.newVideoFrameBlock) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            if (self.isCancelled) {
+                                _newVideoFrameBlock = nil;
+                                _decodeFinishedBlock = nil;
+                                return;
+                            }
+                            self.newVideoFrameBlock(inflatedImageRef, self.filePath);
+
+                            CGImageRelease(inflatedImageRef);
+                        });
+                    }
+                    CGImageRelease(imageRef);
+                }
+
+                if(sampleBuffer) {
+                    CMSampleBufferInvalidate(sampleBuffer);
+                    CFRelease(sampleBuffer);
+                    sampleBuffer = NULL;
+
+                } else {
+                    break;
+                }
+            }
+
+            [NSThread sleepForTimeInterval:CMTimeGetSeconds(videoTrack.minFrameDuration)];
+        }
+
+        if (self.isCancelled) {
+            _newVideoFrameBlock = nil;
+            _decodeFinishedBlock = nil;
+            return;
+        }
+        if (self.decodeFinishedBlock) {
+            self.decodeFinishedBlock(self.filePath);
+        }
+    }
+}
+</code></pre>
+
+<p>解码图片是因为UIImage在界面需要显示的时候才开始解码，这样可能会造成主线程的卡顿，所以在子线程对其进行解压缩处理。</p>
+
+<p>具体的使用：</p>
+
+<pre><code>- (void)playVideoWithFilePath:(NSString *)filePath_ type:(NSString *)type {
+    @weakify(self)
+    [[VideoPlayerManager shareInstance] decodeVideo:filePath_
+                              withVideoPerDataBlock:^(CGImageRef imageData, NSString *filePath) {
+                                  @strongify(self)
+                                  if ([type isEqualToString:@"video"]) {
+                                      if ([filePath isEqualToString:self.filePath]) {
+                                          [self.sources.firstObject
+                                                  setContents:(__bridge id _Nullable)(imageData)];
+                                      }
+                                  }
+                              } decodeFinishBlock:^(NSString *filePath){
+                [self playVideoWithFilePath:filePath type:type];
+            }];
+}
+</code></pre>
+
+<h4>4、其他</h4>
+
+<p>&emsp;&emsp;1、触摸交互是覆盖了以下方法实现：</p>
+
+<pre><code>- (void)touchesCancelled:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event
+- (void)touchesCancelled:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event
+- (void)touchesEnded:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event
+</code></pre>
+
+<p>&emsp;&emsp;2、页面上FPS的测量是使用了YYKit项目中的YYFPSLabel。</p>
+
+<p>&emsp;&emsp;3、测试数据是微博找的，其中小视频是Gif快手。</p>
+
+<p>本文的代码在<a href="">https://github.com/hawk0620/PYQFeedDemo</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[聊聊动画引擎pop]]></title>
