@@ -9,8 +9,7 @@
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="&emsp;&emsp;引起UITableView卡顿比较常见的原因有cell的层级过多、cell中有触发离屏渲染的代码（譬如：cornerRadius、maskToBounds
-同时使用）、像素是否对齐、是否使用UITableView自动计算cell高度的方法等。本文将从cell层级出发， &hellip;">
+  <meta name="description" content="&emsp;&emsp;iOS 音频开发一般是 AudioFileStream 配合 Audio Queue 或者 Audio Unit实现的，而 FFmpeg 是与原生截然不同的硬解码实现，比起原生更支持了诸如 flac、ape、acc、m4a、mp3、wav等格式（原生可通过第三方支持 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +65,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/10/06/ffmpeg-summary/">FFmpeg iOS音频开发的小总结</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-06T21:52:17+08:00" pubdate data-updated="true">Oct 6<sup>th</sup>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&emsp;&emsp;iOS 音频开发一般是 AudioFileStream 配合 Audio Queue 或者 Audio Unit实现的，而 FFmpeg 是与原生截然不同的硬解码实现，比起原生更支持了诸如 flac、ape、acc、m4a、mp3、wav等格式（原生可通过第三方支持 flac 等格式）。因为工作项目的音乐播放器是原生那套实现的，所以就想换个思路，看看用 FFmpeg 开发音频是怎样的体验。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/10/06/ffmpeg-summary/">阅读更多 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -463,59 +503,6 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/21/daymic-tableview-height/">AutoLayout实现的动态TableView高度</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-21T18:15:37+08:00" pubdate data-updated="true">Nov 21<sup>st</sup>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文将介绍下AutoLayout使用纯代码来实现TableView的动态高度。</p>
-
-<p>效果图如下：
-<img src="https://cloud.githubusercontent.com/assets/5633917/11318437/e0909810-908c-11e5-849b-4a40adc10c18.png" alt="dd" /></p>
-
-<p>1、子类化一个UITableViewCell，定义三个控件：</p>
-
-<pre><code>@property (nonatomic, strong) ZPLabel *titleLabel;
-@property (nonatomic, strong) ZPLabel *subtitleLabel;
-@property (nonatomic, strong) UIImageView *customImageView;
-</code></pre>
-
-<p>再在.m文件中创建这三个控件，并添加进<code>cell</code>的<code>contentView</code>中，最后为这三个控件添加约束，这里用到了<code>Masonry</code>：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/11/21/daymic-tableview-height/">阅读更多 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -531,6 +518,10 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/10/06/ffmpeg-summary/">FFmpeg iOS音频开发的小总结</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/07/10/feed-cell/">以仿朋友圈为例谈谈保持UITableView顺滑的技巧</a>
       </li>
     
@@ -544,10 +535,6 @@ mylabel.text=age?[NSString stringWithFormat:@"%@",age]:@"";
     
       <li class="post">
         <a href="/blog/2016/01/10/protobuf-objc/">Objective-C序列化库protobuf的安装</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/01/03/2015booklist/">2015年我读过的几本书</a>
       </li>
     
   </ul>

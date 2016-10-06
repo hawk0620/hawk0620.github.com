@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>FFmpeg iOS音频开发的小总结 - 陈浩的技术博客</title>
+  <meta name="author" content="Hawk0620">
+
+  
+  <meta name="description" content="&emsp;&emsp;iOS 音频开发一般是 AudioFileStream 配合 Audio Queue 或者 Audio Unit实现的，而 FFmpeg 是与原生截然不同的硬解码实现，比起原生更支持了诸如 flac、ape、acc、m4a、mp3、wav等格式（原生可通过第三方支持 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hawk0620.github.io/blog/2016/10/06/ffmpeg-summary">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.useso.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.useso.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.useso.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">陈浩的技术博客</a></h1>
+  
+    <h2>怕什么真理无穷，进一寸有一寸的欢喜</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hawk0620.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">FFmpeg iOS音频开发的小总结</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-06T21:52:17+08:00" pubdate data-updated="true">Oct 6<sup>th</sup>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>&emsp;&emsp;iOS 音频开发一般是 AudioFileStream 配合 Audio Queue 或者 Audio Unit实现的，而 FFmpeg 是与原生截然不同的硬解码实现，比起原生更支持了诸如 flac、ape、acc、m4a、mp3、wav等格式（原生可通过第三方支持 flac 等格式）。因为工作项目的音乐播放器是原生那套实现的，所以就想换个思路，看看用 FFmpeg 开发音频是怎样的体验。</p>
+
+<!--more-->
+
+
+<p>&emsp;&emsp;我对 FFmpeg 的探索起初是从简单 demo 入坑，发现大部分 demo 都需要 sdl，再去了解过 sdl，可谓踩了不少坑，直到我上手 kxmovie、ijkplayer，思路才渐渐清晰起来。经过对比，ijkplayer 是基于 c 实现的项目，实现了跨平台，而 kxmovie 是偏 iOS 实现的项目；kxmovie 在播放 m3u8 有点卡顿的bug，而 ijkplayer 则没有。可知 kxmovie 无论是代码兼容性还是播放视频的效果都没有 ijkplayer 好。ijkplayer 是 Bilibili 开源的一个项目，它基于 FFmpeg 开发了支持移动端音视频解码、视频渲染、播放控制、状态监控等功能。通过 ijkplayer 源码的学习，我对 FFmpeg 有了大致了解，而本文主要聊聊音频相关的。</p>
+
+<h4>FFmpeg 的导入</h4>
+
+<p>&emsp;&emsp;ijkplayer ReadMe 里有关如何编译 FFmpeg 的介绍，只要注意下是否支持更多解码格式即可，将生成出的 .a 文件拖进项目里，为项目添加 libbz.tbd，libbz2.tbd ，再在<code>Build Settings</code>的<code>Library Search Paths</code>添加 项目中 FFmpeg 的.a文件的目录，如 <code>$(PROJECT_DIR)/your_project_name/ffmpeg/lib</code>，FFmpeg 的导入完成了。</p>
+
+<h4>代码处理流程大致介绍</h4>
+
+<p>&emsp;&emsp;我只挑了几个有意思的来总结下，像 ffplay.c 一来就两三千行代码，虽然流程都是套路，但是不记录一下的话，时间久了，挺容易没什么头绪。</p>
+
+<p>&emsp;&emsp;负责底层调用的 ffplay.c，首先注册解码器，初始化 FFPlayer 和 VideoState 开启一条线程调用 <code>read_thread</code>函数。在函数中调用<code>avformat_open_input</code>打开多媒体文件，打开文件后<code>avformat_find_stream_info</code>获取文件中的流信息填充进<code>为ic-&gt;streams</code>，获取流信息后使用<code>av_find_best_stream</code>获取文件的音频和视频流，并准备对音频和视频信息进行解码。接着调用<code>stream_component_open</code>函数，通过<code>avcodec_find_decoder</code>找到<code>codec_id</code>已注册的音视频解码器，再就是<code>avcodec_open2</code>打开解码器准备音视频的解码，再从<code>audio_open</code>开启<code>sdl_audio_callback</code>回调。此时在<code>read_thread</code>函数中会循环读取<code>av_read_frame(ic, pkt)</code>包数据，并将包数据存入包队列以供解码时使用。而对于音频解码会起新的线程调用<code>audio_thread</code>（视频则是<code>video_thread</code>），取出包数据后，使用<code>avcodec_decode_audio4</code>将解码后的 Frame 交给帧队列。<code>sdl_audio_callback </code>里的<code>audio_decode_frame</code>负责从帧队列中取出 Frame <code>frame_queue_peek_readable(&amp;is-&gt;sampq)</code>，完成重采样后，将 data 通过<code>memcpy</code>拷贝的方式回调给高层使用。</p>
+
+<p>&emsp;&emsp;ijkplayer.c 是对 ffplay.c 的封装，包括播放暂停，获取文件时长，可播放时长，seek到特定时间点播放等，也实现了播放器的状态的监听。</p>
+
+<p>&emsp;&emsp;<code>ijksdl_aout_ios_audiounit</code>与<code>ijksdl_aout</code>的设计挺有趣，它们共同串联了从高层到 FFmpeg 层的操作，通过指针函数，在<code>ijksdl_aout_ios_audiounit </code>注册了高层音频调用实现，<code>ijksdl_aout</code>负责供 FFmpeg 调用，从而达到解藕的效果。</p>
+
+<h4>实践</h4>
+
+<p>先来张效果图</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/19155771/461f07a8-8c12-11e6-9bd8-66fdbf4e3cde.gif" alt="" /></p>
+
+<p>&emsp;&emsp;基于边学习边动手的原则，我完成了一个仅支持音频播放的 <a href="https://github.com/hawk0620/FFMusicPlayer">demo</a>，因为仅仅是支持音频，demo中对 ijkplayer 的几个文件做了点修改，比如剔除原来视频相关的代码，修改其仅从音频文件中取出封面</p>
+
+<pre><code>....
+switch (d-&gt;avctx-&gt;codec_type) {
+    case AVMEDIA_TYPE_VIDEO:
+        if (d-&gt;pkt_temp.data &amp;&amp; d-&gt;pkt_temp.size) {
+            ffp-&gt;artist_data = d-&gt;pkt_temp.data;
+            ffp-&gt;artist_size = d-&gt;pkt_temp.size;
+            ffp-&gt;cover_data(ffp);
+        }
+    break;
+....
+
+
+
+void audio_cover_data(uint8_t *data, int size) {
+    UIImage *image = nil;
+    NSData *imgData = [NSData dataWithBytes:data length:size];
+
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)(imgData));
+    if (provider) {
+        CGImageRef imageRef = CGImageCreateWithJPEGDataProvider(provider, NULL, YES,  kCGRenderingIntentDefault);
+        if (imageRef) {
+
+            image = [UIImage imageWithCGImage:imageRef];
+            CGImageRelease(imageRef);
+        }
+        CGDataProviderRelease(provider);
+    }
+}
+</code></pre>
+
+<h4>总结</h4>
+
+<p>&emsp;&emsp;在学习和使用中还是发现了一点小遗憾，FFmpeg 还没有提供对 io 层的缓存支持，这导致了在播放网络文件的时候拖拽进度条会重新进行缓冲，也无法实现边播边存的功能，我尝试过获取pkt的data并在<code>av_read_frame</code>的ret&lt;0文件结束的情况下缓存起来，但这其实并没能保证帧顺序，拖拽过进度条之后的data也将会不完整，所以放弃了这种方案，官方的说法是在 libavformat/cache.c 中进行实现。</p>
+
+<p>&emsp;&emsp;有个小问题是对于缓冲进度的计算有点小误差，playableDuration 无法与多媒体文件时长一致。我尝试在<code>av_read_frame</code>文件结束的地方</p>
+
+<pre><code>SDL_LockMutex(wait_mutex);
+SDL_CondWaitTimeout(is-&gt;continue_read_thread, wait_mutex, 10);
+SDL_UnlockMutex(wait_mutex);
+ffp_statistic_l(ffp);
+</code></pre>
+
+<p>之后发送一个通知，直接将缓冲进度条置为100%</p>
+
+<p>&emsp;&emsp;还有个小问题是 ijkplayer 播放本地文件的时候，假如是一首2、30m的无损歌曲，播放器不会一下子把整个文件都解码进内存中，这时当seek到文件未进入到内存的部分，播放器就直接停止播放了，我试过修改<code>MAX_QUEUE_SIZE</code>的值也是无效，只好暂时先放放这个问题。</p>
+
+<p>&emsp;&emsp;在 ijkplayer 的 某个issue 中看到了 bbcallen 貌似说b站的客户端也用系统原生来播放视频，我觉得<code>iOS</code>播放视频的话使用<code>MPMoviePlayerController</code>就好了。</p>
+
+<p>&emsp;&emsp;当然，如果是直播项目，无疑是 FFmpeg 的用武之地。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Hawk0620</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-06T21:52:17+08:00" pubdate data-updated="true">Oct 6<sup>th</sup>, 2016</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/07/10/feed-cell/" title="Previous Post: 以仿朋友圈为例谈谈保持UITableView顺滑的技巧">&laquo; 以仿朋友圈为例谈谈保持UITableView顺滑的技巧</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/10/06/ffmpeg-summary/">FFmpeg iOS音频开发的小总结</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/10/feed-cell/">以仿朋友圈为例谈谈保持UITableView顺滑的技巧</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/04/30/talk-with-pop/">聊聊动画引擎pop</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/01/tan-tan-percent-at-ke-yi-ge-shi-zen-yang-de-nsinteger/">谈谈%@可以格式怎样的NSInteger</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/10/protobuf-objc/">Objective-C序列化库protobuf的安装</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Hawk0620 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1258913775'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1258913775%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
