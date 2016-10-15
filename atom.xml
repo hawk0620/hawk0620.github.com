@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2016-10-06T22:23:00+08:00</updated>
+  <updated>2016-10-15T10:38:03+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -18,7 +18,7 @@
     <link href="http://hawk0620.github.io/blog/2016/10/06/ffmpeg-summary/"/>
     <updated>2016-10-06T21:52:17+08:00</updated>
     <id>http://hawk0620.github.io/blog/2016/10/06/ffmpeg-summary</id>
-    <content type="html"><![CDATA[<p>&emsp;&emsp;iOS 音频开发一般是 AudioFileStream 配合 Audio Queue 或者 Audio Unit实现的，而 FFmpeg 是与原生截然不同的硬解码实现，比起原生更支持了诸如 flac、ape、acc、m4a、mp3、wav等格式（原生可通过第三方支持 flac 等格式）。因为工作项目的音乐播放器是原生那套实现的，所以就想换个思路，看看用 FFmpeg 开发音频是怎样的体验。</p>
+    <content type="html"><![CDATA[<p>&emsp;&emsp;iOS 音频开发一般是 AudioFileStream 配合 Audio Queue 或者 Audio Unit实现的，而 FFmpeg 是与原生截然不同的软解码实现，比起原生更支持了诸如 flac、ape、acc、m4a、mp3、wav等格式（原生可通过第三方支持 flac 等格式）。因为工作项目的音乐播放器是原生那套实现的，所以就想换个思路，看看用 FFmpeg 开发音频是怎样的体验。</p>
 
 <!--more-->
 
@@ -91,7 +91,7 @@ ffp_statistic_l(ffp);
 
 <p>之后发送一个通知，直接将缓冲进度条置为100%</p>
 
-<p>&emsp;&emsp;还有个小问题是 ijkplayer 播放本地文件的时候，假如是一首2、30m的无损歌曲，播放器不会一下子把整个文件都解码进内存中，这时当seek到文件未进入到内存的部分，播放器就直接停止播放了，我试过修改<code>MAX_QUEUE_SIZE</code>的值也是无效，只好暂时先放放这个问题。</p>
+<p>&emsp;&emsp;还有个小问题是 ijkplayer 播放本地文件的时候，假如是一首2、30m的无损歌曲，播放器不会一下子把整个文件都解码进内存中，这时当seek到文件未进入到内存的部分，播放器就直接停止播放了，我试过修改<code>MAX_QUEUE_SIZE</code>的值也是无效，最后 bbcallen 回复我说：That should be an ffmpeg issue, take a look at the comment of avformat_seek_file()，如此看来也是暂时解决无望。</p>
 
 <p>&emsp;&emsp;在 ijkplayer 的 某个issue 中看到了 bbcallen 貌似说b站的客户端也用系统原生来播放视频，我觉得<code>iOS</code>播放视频的话使用<code>MPMoviePlayerController</code>就好了。</p>
 
