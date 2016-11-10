@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2016-10-17T23:59:19+08:00</updated>
+  <updated>2016-11-10T23:16:58+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,237 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[EasyDataKit 简单易用的 SQLite 轮子]]></title>
+    <link href="http://hawk0620.github.io/blog/2016/11/10/easydatakit-introduction/"/>
+    <updated>2016-11-10T22:30:38+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2016/11/10/easydatakit-introduction</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/hawk0620/EasyDataKit">EasyDataKit</a> 是一个基于 FMDB 封装的库，它可以免去开发者编写复杂 SQL 的困扰，更加专注业务上的事情，从而提高开发效率。</p>
+
+<h2>特征</h2>
+
+<ul>
+<li><p>类 ORM 接口</p></li>
+<li><p>自动创建库和表，支持表新增字段的修改</p></li>
+<li><p>支持 where 查询语句</p></li>
+<li><p>自动事务提升插入效率</p></li>
+</ul>
+
+
+<!--more-->
+
+
+<h2>使用</h2>
+
+<p>EasyDataKit 适用于将网络请求的数据持久化到数据库中，特别是处理网络请求数据时不习惯把数据转换成 model。笔者的浅见是：转换对性能是有消耗的，获得的可读性好处也可以通过字符串常量解决。（<a href="http://casatwy.com/OOP_nomodel.html">这儿有篇探讨</a>）</p>
+
+<p>假设你通过网络请求获取到了数据：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>    "data": {
+</span><span class='line'>        "id": "56d177a27cb3331100465f72",
+</span><span class='line'>        "messagePrefix": "饭否每日精选",
+</span><span class='line'>        "content": "饭否每日精选",
+</span><span class='line'>        "topicId": 1345,
+</span><span class='line'>        "briefIntro": "饭否是国内著名的小众轻博客社区，氛围独特，清新自由。关注饭否每日精选，看看尘嚣之外，大家谈论什么。",
+</span><span class='line'>        "keywords": "饭否 精选 短博客 社区",
+</span><span class='line'>        "timeForRank": "2016-02-27T11:06:30.731Z",
+</span><span class='line'>        "lastMessagePostTime": "2016-11-06T02:42:52.111Z",
+</span><span class='line'>        "topicPublishDate": "2016-02-26T16:00:00.000Z",
+</span><span class='line'>        "createdAt": "2016-02-27T10:17:06.295Z",
+</span><span class='line'>        "updatedAt": "2016-11-01T04:30:08.973Z",
+</span><span class='line'>        "subscribersCount": 1207100,
+</span><span class='line'>        "subscribedStatusRawValue": 1,
+</span><span class='line'>        "subscribedAt": "2016-10-18T09:57:24.424Z",
+</span><span class='line'>        "rectanglePicture": {
+</span><span class='line'>            "thumbnailUrl": "https://cdn.ruguoapp.com/o_1ach3c6o011j91ljjtmdhlhnffo.jpg?imageView2/1/w/120/h/180",
+</span><span class='line'>            "middlePicUrl": "https://cdn.ruguoapp.com/o_1ach3c6o011j91ljjtmdhlhnffo.jpg?imageView2/1/w/200/h/300",
+</span><span class='line'>            "picUrl": "https://cdn.ruguoapp.com/o_1ach3c6o011j91ljjtmdhlhnffo.jpg?imageView2/0/h/1000",
+</span><span class='line'>            "format": "png"
+</span><span class='line'>        },
+</span><span class='line'>        "squarePicture": {
+</span><span class='line'>            "thumbnailUrl": "https://cdn.ruguoapp.com/o_1ach6nm599m94re1gvj14r71jaso.jpg?imageView2/0/w/120/h/120",
+</span><span class='line'>            "middlePicUrl": "https://cdn.ruguoapp.com/o_1ach6nm599m94re1gvj14r71jaso.jpg?imageView2/0/w/300/h/300",
+</span><span class='line'>            "picUrl": "https://cdn.ruguoapp.com/o_1ach6nm599m94re1gvj14r71jaso.jpg?imageView2/0/h/1000",
+</span><span class='line'>            "format": "png"
+</span><span class='line'>        },
+</span><span class='line'>        "pictureUrl": "https://cdn.ruguoapp.com/o_1ach3c6o011j91ljjtmdhlhnffo.jpg?imageView2/1/w/200/h/300",
+</span><span class='line'>        "thumbnailUrl": "https://cdn.ruguoapp.com/o_1ach6nm599m94re1gvj14r71jaso.jpg?imageView2/0/w/300/h/300"
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你可将这段 JSON String 转换成 Dictionary 或 Array:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">dictionary</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSJSONSerialization</span> <span class="n">JSONObjectWithData</span><span class="o">:</span><span class="n">data</span> <span class="n">options</span><span class="o">:</span><span class="n">NSJSONReadingAllowFragments</span> <span class="n">error</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">subscribe</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="s">@&quot;data&quot;</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接着便可使用 EasyDataKit 的 API 进行存储：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">subscribeEntity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;subcribes&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">subscribeEntity</span> <span class="n">saveData</span><span class="o">:</span><span class="n">subscribe</span> <span class="n">primaryColumn</span><span class="o">:</span><span class="s">@&quot;id&quot;</span> <span class="n">relationShip</span><span class="o">:</span><span class="nb">nil</span> <span class="n">indexes</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以手动为数据添加列，实现满足业务的需求：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">NSMutableDictionary</span> <span class="o">*</span><span class="n">subcribeInfo</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSMutableDictionary</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithDictionary</span><span class="o">:</span><span class="n">subscribe</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">subcribeInfo</span> <span class="n">setObject</span><span class="o">:</span><span class="mi">@1</span> <span class="n">forKey</span><span class="o">:</span><span class="s">@&quot;isSubcribed&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">subscribeEntity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;subcribes&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">subscribeEntity</span> <span class="n">saveData</span><span class="o">:</span><span class="n">subcribeInfo</span> <span class="n">primaryColumn</span><span class="o">:</span><span class="s">@&quot;id&quot;</span> <span class="n">relationShip</span><span class="o">:</span><span class="nb">nil</span> <span class="n">indexes</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想让某纪录关联其它对象，可以将对象存储后返回的 id 作为 value，key 是该纪录原本对应该对象的字段，这相当于用 id 这个值去替换原本字段对应的对象，从而达到拆分的目的：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="kt">id</span> <span class="n">rowId</span> <span class="o">=</span> <span class="p">[</span><span class="n">rectanglePictureEntity</span> <span class="n">saveData</span><span class="o">:</span><span class="n">subscribe</span><span class="p">[</span><span class="s">@&quot;rectanglePicture&quot;</span><span class="p">]</span> <span class="n">primaryColumn</span><span class="o">:</span><span class="nb">nil</span> <span class="n">relationShip</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">subscribeEntity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;subcribes&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">subscribeEntity</span> <span class="n">saveData</span><span class="o">:</span><span class="n">subscribe</span> <span class="n">primaryColumn</span><span class="o">:</span><span class="s">@&quot;id&quot;</span> <span class="n">relationShip</span><span class="o">:</span><span class="p">@{</span><span class="s">@&quot;rectanglePicture&quot;</span><span class="o">:</span> <span class="n">rowId</span><span class="p">}</span> <span class="n">indexes</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>存储索引：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">subcribeInfo</span> <span class="o">=</span> <span class="p">[[</span><span class="n">NSDictionary</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithDictionary</span><span class="o">:</span><span class="n">subscribe</span><span class="p">];</span>
+</span><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">subscribeEntity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;subcribes&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="s">@&quot;TestIndex&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">subscribeEntity</span> <span class="n">saveData</span><span class="o">:</span><span class="n">subcribeInfo</span> <span class="n">primaryColumn</span><span class="o">:</span><span class="nb">nil</span> <span class="n">relationShip</span><span class="o">:</span><span class="nb">nil</span> <span class="n">indexes</span><span class="o">:</span><span class="p">@[@[</span><span class="s">@&quot;topicId&quot;</span><span class="p">],</span> <span class="p">@[</span><span class="s">@&quot;content&quot;</span><span class="p">,</span> <span class="s">@&quot;messagePrefix&quot;</span><span class="p">]]];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对存储来说，EasyDataKit 还提供了自动 ALTER TABLE 添加列的功能，方便开发者应对升级，原理是当检测到待存储的字典 keys 数组元素个数比之前已经在表中的列多时，则会自动为表添加新的列，即并不支持修改列和删除列的操作，而 EasyDataKit 对创建的索引是支持修改删除的。</p>
+
+<p>查询：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// select by id</span>
+</span><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">entity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;messages&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="kt">id</span> <span class="n">object</span> <span class="o">=</span> <span class="p">[</span><span class="n">entity</span> <span class="n">queryByPrimaryKey</span><span class="o">:</span><span class="s">@&quot;581d2fdb36a4471100e311d6&quot;</span> <span class="n">withColumns</span><span class="o">:</span><span class="p">@[</span><span class="s">@&quot;topicId&quot;</span><span class="p">,</span> <span class="s">@&quot;commentCount&quot;</span><span class="p">,</span> <span class="s">@&quot;topic&quot;</span><span class="p">]];</span>
+</span><span class='line'><span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;%@&quot;</span><span class="p">,</span> <span class="n">object</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">NSArray</span> <span class="o">*</span><span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">entity</span> <span class="n">queryWithColumns</span><span class="o">:</span><span class="nb">nil</span> <span class="n">where</span><span class="o">:</span><span class="s">@&quot;WHERE commentCount &lt; ? and read = ?&quot;</span> <span class="n">arguments</span><span class="o">:</span><span class="p">@[</span><span class="mi">@20</span><span class="p">,</span> <span class="mi">@1</span><span class="p">]];</span>
+</span><span class='line'><span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;%@&quot;</span><span class="p">,</span> <span class="n">objects</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查询嵌套对象并将其转换为 Dictionary 或 Array：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">subcribeEntity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;subcribes&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="c1">// select by id</span>
+</span><span class='line'><span class="kt">id</span> <span class="n">subcribe</span> <span class="o">=</span> <span class="p">[</span><span class="n">subcribeEntity</span> <span class="n">queryByPrimaryKey</span><span class="o">:</span><span class="s">@&quot;56d177a27cb3331100465f72&quot;</span> <span class="n">withColumns</span><span class="o">:</span><span class="p">@[</span><span class="s">@&quot;squarePicture&quot;</span><span class="p">]];</span>
+</span><span class='line'><span class="c1">// subcribe is a json string</span>
+</span><span class='line'><span class="n">NSData</span> <span class="o">*</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">subcribe</span><span class="p">[</span><span class="s">@&quot;squarePicture&quot;</span><span class="p">]</span> <span class="n">dataUsingEncoding</span><span class="o">:</span><span class="n">NSUTF8StringEncoding</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">;</span>
+</span><span class='line'><span class="n">NSDictionary</span> <span class="o">*</span><span class="n">jsonDict</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSJSONSerialization</span> <span class="n">JSONObjectWithData</span><span class="o">:</span><span class="n">data</span> <span class="n">options</span><span class="o">:</span><span class="mi">0</span> <span class="n">error</span><span class="o">:&amp;</span><span class="n">error</span><span class="p">];</span>
+</span><span class='line'><span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;JSONDict: %@&quot;</span><span class="p">,</span> <span class="n">jsonDict</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更新：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">entity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;messages&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="p">[</span><span class="n">entity</span> <span class="n">updateByPrimaryKey</span><span class="o">:</span><span class="s">@&quot;5805905a319a9c1200833660&quot;</span> <span class="n">set</span><span class="o">:</span><span class="p">@{</span><span class="s">@&quot;read&quot;</span><span class="o">:</span> <span class="s">@&quot;0&quot;</span><span class="p">,</span> <span class="s">@&quot;commentCount&quot;</span><span class="o">:</span> <span class="mi">@99</span><span class="p">}];</span>
+</span><span class='line'><span class="p">[</span><span class="n">entity</span> <span class="n">updateWithSet</span><span class="o">:</span><span class="p">@{</span><span class="s">@&quot;messageId&quot;</span><span class="o">:</span> <span class="s">@&quot;2333333&quot;</span><span class="p">}</span> <span class="n">where</span><span class="o">:</span><span class="s">@&quot;WHERE commentCount &gt; ?&quot;</span> <span class="n">arguments</span><span class="o">:</span><span class="p">@[</span><span class="mi">@50</span><span class="p">]];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">EDKEntity</span> <span class="o">*</span><span class="n">entity</span> <span class="o">=</span> <span class="p">[[</span><span class="n">EDKEntity</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithTableName</span><span class="o">:</span><span class="s">@&quot;messages&quot;</span> <span class="n">dbName</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'><span class="c1">// delete by id</span>
+</span><span class='line'><span class="p">[</span><span class="n">entity</span> <span class="n">deleteByPrimaryKey</span><span class="o">:</span><span class="s">@&quot;5805905a319a9c1200833660&quot;</span><span class="p">];</span>
+</span><span class='line'><span class="c1">// delete by where</span>
+</span><span class='line'><span class="p">[</span><span class="n">entity</span> <span class="n">deleteWithWhere</span><span class="o">:</span><span class="s">@&quot;WHERE popularity = ?&quot;</span> <span class="n">arguments</span><span class="o">:</span><span class="p">@[</span><span class="s">@&quot;93&quot;</span><span class="p">]];</span>
+</span><span class='line'><span class="c1">// delete all</span>
+</span><span class='line'><span class="p">[</span><span class="n">entity</span> <span class="n">deleteAll</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由上面可以看出，只要创建出 EDKEntity 对象，就可以轻松加愉快地进行存储，查找，修改，删除操作。开发者无需创建数据库、表，EasyDataKit 也支持 db 的划分，但不提供内存缓存，原因是笔者认为没有热块的数据库缓存意义不是太大。当有写操作发生的时候，EasyDataKit 会通过轮询的事务机制打包写操作，从而提高频繁写操作的效率。</p>
+
+<h2>源码简析</h2>
+
+<p>EasyDataKit 有个 swizzle 了 NSMutableDictionary 的 setObject:forKey: 和 NSMutableArray 的 addObject:，使得应对空值不会 crash。</p>
+
+<p>EasyDataKit 还有个递归方法：dealWithObject:，主要有两个用途：一是用来检测除了 NSDictionary、NSArray、NSString、NSNumber、NSNull 这些类型以外的合法性，譬如 UIView 类型直接调用 description 转换成字符串；二是为了能让嵌套的 Dictionary 或 Array 以 JSON String 的形式存入数据库，在取出后仍可以将其转换回 Dictionary 或 Array。</p>
+
+<p>DISPATCH_SOURCE_TYPE_TIMER 创建的定时器。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[FFmpeg iOS音频开发的小总结]]></title>
