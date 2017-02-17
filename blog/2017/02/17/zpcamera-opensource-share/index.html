@@ -95,6 +95,9 @@
 
 <p><img src="https://cloud.githubusercontent.com/assets/5633917/23069130/3921d0ea-f561-11e6-92c2-ffc308d26460.jpeg" alt="" /></p>
 
+<!--more-->
+
+
 <h2>1、GLKView和GPUImageVideoCamera</h2>
 
 <p>一开始取景框的预览我是基于 GLKView 做的，GLKView 是苹果对 <code>OpenGL</code> 的封装，我们可以使用它的回调函数 <code>-glkView:drawInRect:</code> 进行对处理后的 <code>samplebuffer</code> 渲染的工作（<code>samplebuffer</code> 是在相机回调 <code>didOutputSampleBuffer</code> 产生的），附上当初简版代码：</p>
