@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2017-02-17T22:28:58+08:00</updated>
+  <updated>2017-02-17T22:35:25+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -19,6 +19,8 @@
     <updated>2017-02-17T22:25:00+08:00</updated>
     <id>http://hawk0620.github.io/blog/2017/02/17/zpcamera-opensource-share</id>
     <content type="html"><![CDATA[<p>Osho 相机是我独立开发上架的一个相机 App，它支持1:1，4:3，16:9多种分辨率拍摄，滤镜可在取景框的实时预览，拍摄过程可与滤镜实时合成，支持分段拍摄，支持回删等特性。下面先分享分享开发这个 App 的一些心得体会，文末会给出项目的下载地址，阅读本文可能需要一点点 AVFoundation 开发的基础。</p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/5633917/23069130/3921d0ea-f561-11e6-92c2-ffc308d26460.jpeg" alt="" /></p>
 
 <h2>1、GLKView和GPUImageVideoCamera</h2>
 
