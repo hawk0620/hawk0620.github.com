@@ -94,6 +94,9 @@
 
 <div class="entry-content"><p>Core Text 是苹果提供的富文本排版技术，可以定制开发图文混排功能，DTCoreText、Nimbus、YYLabel 等优秀的开源库底层都是基于 Core Text 的封装和扩展。本文将介绍 Core Text 的基本用法，逐步讲解我是如何封装一个 <a href="https://github.com/hawk0620/PYQFeedDemo">AttributedLabel</a> 的。</p>
 
+<!--more-->
+
+
 <h3>文本排版简述</h3>
 
 <p>文本排版是根据给定的文本（text）、字体（font）、绘制区域（shape）、行高（line height）等相关属性，生成出字形（glyphs）布局在屏幕绘制区的适当位置。排版的核心就是将字符（characters）转换成字形，将字形排列成行（lines），再将行排成段落（paragraphs）。用代码表达就是下边寥寥几行。</p>
