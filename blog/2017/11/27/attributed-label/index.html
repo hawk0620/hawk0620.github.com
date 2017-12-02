@@ -1,24 +1,98 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[陈浩的技术博客]]></title>
-  <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
-  <link href="http://hawk0620.github.io/"/>
-  <updated>2017-12-02T22:09:49+08:00</updated>
-  <id>http://hawk0620.github.io/</id>
-  <author>
-    <name><![CDATA[Hawk0620]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>如何实现一个 AttributedLabel - 陈浩的技术博客</title>
+  <meta name="author" content="Hawk0620">
 
   
-  <entry>
-    <title type="html"><![CDATA[如何实现一个 AttributedLabel]]></title>
-    <link href="http://hawk0620.github.io/blog/2017/11/27/attributed-label/"/>
-    <updated>2017-11-27T23:46:34+08:00</updated>
-    <id>http://hawk0620.github.io/blog/2017/11/27/attributed-label</id>
-    <content type="html"><![CDATA[<p>Core Text 是苹果提供的富文本排版技术，可以定制开发图文混排功能，DTCoreText、Nimbus、YYLabel 等优秀的开源库底层都是基于 Core Text 的封装和扩展。本文将介绍 Core Text 的基本用法，逐步讲解我是如何封装一个 <a href="https://github.com/hawk0620/PYQFeedDemo">AttributedLabel</a> 的。</p>
+  <meta name="description" content="Core Text 是苹果提供的富文本排版技术，可以定制开发图文混排功能，DTCoreText、Nimbus、YYLabel 等优秀的开源库底层都是基于 Core Text 的封装和扩展。本文将介绍 Core Text 的基本用法，逐步讲解我是如何封装一个 AttributedLabel 的。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hawk0620.github.io/blog/2017/11/27/attributed-label">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//7jpncc.com1.z0.glb.clouddn.com/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//7xld7n.com1.z0.glb.clouddn.com/pt_serif.css" rel="stylesheet" type="text/css">
+<link href="//7xld7n.com1.z0.glb.clouddn.com/PT_Sans.css" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">陈浩的技术博客</a></h1>
+  
+    <h2>怕什么真理无穷，进一寸有一寸的欢喜</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hawk0620.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">如何实现一个 AttributedLabel</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-11-27T23:46:34+08:00" pubdate data-updated="true">Nov 27<sup>th</sup>, 2017</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Core Text 是苹果提供的富文本排版技术，可以定制开发图文混排功能，DTCoreText、Nimbus、YYLabel 等优秀的开源库底层都是基于 Core Text 的封装和扩展。本文将介绍 Core Text 的基本用法，逐步讲解我是如何封装一个 <a href="https://github.com/hawk0620/PYQFeedDemo">AttributedLabel</a> 的。</p>
 
 <h3>文本排版简述</h3>
 
@@ -386,7 +460,91 @@
 <p>本文记录了如何造一个 AttributedLabel 的轮子，相信读者结合代码一起看会发现实现简单的 Core Text 排版功能并不难，而笔者在剥离业务代码、实现通用性、封装工具类上还是遇到不少技术挑战。建议大家在平常开发中能多造点轮子锻炼锻炼技术，也能提高 iOS 技术社区的活力。同时希望大家在用惯了业界标准的 YYText 时，顺带了解下 Core Text 的使用流程。</p>
 
 <p>Github 地址：<a href="https://github.com/hawk0620/PYQFeedDemo">https://github.com/hawk0620/PYQFeedDemo</a></p>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-</feed>
+
+<span class="byline author vcard">Posted by <span class="fn">Hawk0620</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-11-27T23:46:34+08:00" pubdate data-updated="true">Nov 27<sup>th</sup>, 2017</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/11/27/attributed-label/">如何实现一个 AttributedLabel</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2017 - Hawk0620 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1258913775'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1258913775%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

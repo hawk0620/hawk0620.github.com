@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>GCD(semaphore)的日常 - 陈浩的技术博客</title>
+  <title>关于我 - 陈浩的技术博客</title>
   <meta name="author" content="Hawk0620">
 
   
-  <meta name="description" content="当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过GCD来帮助我们实现。 dispatch_semaphore简介 dispatch_semaphore_create创建一个带初始值的semaphore； &hellip;">
+  <meta name="description" content=" 关于我 Hawk，一名 90 后程序员，现居广州。记录感悟，分享技术。
+感谢关注我的博客，欢迎关注我的 Github，我的  微博 。 Recent Posts 如何实现一个 AttributedLabel ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hawk0620.github.io/blog/2014/09/20/dispatch-semaphore">
+  <link rel="canonical" href="http://hawk0620.github.io/about">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="陈浩的技术博客" type="application/atom+xml">
@@ -58,107 +59,36 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
 </ul>
 
 </nav>
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">GCD(semaphore)的日常</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
-        
-      </p>
+    <h1 class="entry-title">关于我</h1>
     
   </header>
-
-
-<div class="entry-content"><p> 当代码块在执行一些特定操作时，比如异步处理，有时需要等待代码块是否执行完成，这时可以通过<code>GCD</code>来帮助我们实现。</p>
-
-<!--more-->
-
-
-<h3>dispatch_semaphore简介</h3>
-
-<p> <code>dispatch_semaphore_create</code>创建一个带初始值的semaphore；</p>
-
-<p> <code>dispatch_semaphore_signal</code>增加semaphore的计数，并发送semaphore信号；</p>
-
-<p> <code>dispatch_semaphore_wait</code>减少semaphore的计数，并等待semaphore信号的到达。</p>
-
-<p> 示例代码：</p>
-
-<pre><code>dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-
-[self singleBlock:^(id param){
-    // your codes...
-    dispatch_semaphore_signal(sem);
-}];
-
-dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
-</code></pre>
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">Hawk0620</span></span>
-
-      
-
-
-
-
-
-
-
+  <p>Hawk，一名 90 后程序员，现居广州。记录感悟，分享技术。
+感谢关注我的博客，欢迎关注我的 <a href="https://github.com/hawk0620" title="Github">Github</a>，我的 <a href="http://weibo.com/hawk0620" title="weibo"> 微博 </a>。</p>
 
   
-
-
-<time datetime="2014-09-20T19:36:00+08:00" pubdate data-updated="true">Sep 20<sup>th</sup>, 2014</time>
+    <footer>
       
-
-
-    </p>
-    
-      <div class="sharing">
+      
+        <div class="sharing">
   
   
   
 </div>
 
-    
-    <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/07/27/daily-nsurlsession/" title="Previous Post: NSURLSession的日常">&laquo; NSURLSession的日常</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2015/06/02/ios-xian-cheng-tong-bu-at-synchronizedguan-jian-zi/" title="Next Post: iOS 线程同步: @synchronized指令">iOS 线程同步: @synchronized指令 &raquo;</a>
-      
-    </p>
-  </footer>
+    </footer>
+  
 </article>
 
 </div>
@@ -170,23 +100,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2017/02/17/zpcamera-opensource-share/">开源一个上架 App Store 的相机 App</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/11/10/easydatakit-introduction/">EasyDataKit 简单易用的 SQLite 轮子</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/10/06/ffmpeg-summary/">FFmpeg iOS音频开发的小总结</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/07/10/feed-cell/">以仿朋友圈为例谈谈保持UITableView顺滑的技巧</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/04/30/talk-with-pop/">聊聊动画引擎pop</a>
+        <a href="/blog/2017/11/27/attributed-label/">如何实现一个 AttributedLabel</a>
       </li>
     
   </ul>
