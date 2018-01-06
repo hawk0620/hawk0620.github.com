@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2018-01-06T18:27:58+08:00</updated>
+  <updated>2018-01-06T18:31:05+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -89,8 +89,8 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">contentView</span> <span class="o">|&lt;-</span><span class="n">fullWidth</span><span class="o">-----------&gt;|</span>
-</span><span class='line'><span class="n">stackView</span>       <span class="o">|&lt;-</span><span class="n">stackViewWidth</span><span class="o">-&gt;|</span>
-</span><span class='line'><span class="n">customView</span>    <span class="o">|&lt;-</span><span class="n">reducedWidth</span><span class="o">--&gt;|</span>
+</span><span class='line'><span class="n">stackView</span>     <span class="o">|&lt;-</span><span class="n">stackViewWidth</span><span class="o">-&gt;|</span>
+</span><span class='line'><span class="n">customView</span>    <span class="o">|&lt;-</span><span class="n">reducedWidth</span><span class="o">---&gt;|</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
