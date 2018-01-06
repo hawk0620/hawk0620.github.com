@@ -4,7 +4,7 @@
   <title><![CDATA[陈浩的技术博客]]></title>
   <link href="http://hawk0620.github.io/atom.xml" rel="self"/>
   <link href="http://hawk0620.github.io/"/>
-  <updated>2017-12-02T22:26:11+08:00</updated>
+  <updated>2018-01-06T18:27:58+08:00</updated>
   <id>http://hawk0620.github.io/</id>
   <author>
     <name><![CDATA[Hawk0620]]></name>
@@ -12,6 +12,194 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[iOS 11 怎样为导航条上的 UIBarButtonItem 设置间距]]></title>
+    <link href="http://hawk0620.github.io/blog/2018/01/06/ios11-barbuttonitem/"/>
+    <updated>2018-01-06T14:28:20+08:00</updated>
+    <id>http://hawk0620.github.io/blog/2018/01/06/ios11-barbuttonitem</id>
+    <content type="html"><![CDATA[<p>以前我们常用 <code>fixedSpace</code> 的方式为 UINavigationBar 上的 UIBarButtonItem 设置间距：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">UIBarButtonItem</span> <span class="o">*</span><span class="n">negativeSpacer</span> <span class="o">=</span> <span class="p">[[</span><span class="n">UIBarButtonItem</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithBarButtonSystemItem</span><span class="o">:</span><span class="n">UIBarButtonSystemItemFixedSpace</span>
+</span><span class='line'>                                                                                <span class="n">target</span><span class="o">:</span><span class="nb">nil</span>
+</span><span class='line'>                                                                                <span class="n">action</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">negativeSpacer</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="o">-</span><span class="mi">8</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">navigationItem</span> <span class="n">setLeftBarButtonItems</span><span class="o">:</span><span class="p">@[</span><span class="n">negativeSpacer</span><span class="p">,</span> <span class="n">button</span><span class="p">]</span> <span class="n">animated</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!--more-->
+
+
+<p>然而在 iOS 11 下 <code>UIBarButtonItem</code> width 属性不但失效了，<code>UIBarButtonItem</code> 也开始使用 auto layout 布局，对此我们需要设置 <code>UIBarButtonItem</code> 子 view 的约束。除此之外，苹果还修改了 <code>UINavigationBar</code> 的实现。直到 iOS 10 <code>UINavigationBar</code> 都是采用手动布局，所有的子 view 都是直接加在 <code>UINavigationBar</code> 上。但是，从 iOS 11 开始， <code>UINavigationBar</code> 使用了 auto layout 来布局它的内容子 view，并且子 view 加在了 <code>_UINavigationBarContentView</code> 上。</p>
+
+<p>先来看看 iOS 11 下 <code>UINavigationBar</code> 的视图层级：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">UINavigationBar</span>
+</span><span class='line'>      <span class="o">|</span> <span class="n">_UIBarBackground</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span> <span class="n">UIImageView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span> <span class="n">UIImageView</span>
+</span><span class='line'>      <span class="o">|</span> <span class="n">_UINavigationBarLargeTitleView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span> <span class="n">UILabel</span>
+</span><span class='line'>      <span class="o">|</span> <span class="n">_UINavigationBarContentView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span> <span class="n">_UIButtonBarStackView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">_UIButtonBarButton</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">_UIModernBarButton</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">UIButtonLabel</span>
+</span><span class='line'>      <span class="o">|</span> <span class="n">_UINavigationBarContentView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span> <span class="n">_UIButtonBarStackView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">_UITAMICAdaptorView</span> <span class="c1">// customView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">UIBarButtonItem</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">UIImageView</span>
+</span><span class='line'>      <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span> <span class="n">UIButtonLabel</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过 View Debug 工具可知，原来是 stackView 限制了 customView 的宽度以及引起了偏移：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">contentView</span> <span class="o">|&lt;-</span><span class="n">fullWidth</span><span class="o">-----------&gt;|</span>
+</span><span class='line'><span class="n">stackView</span>       <span class="o">|&lt;-</span><span class="n">stackViewWidth</span><span class="o">-&gt;|</span>
+</span><span class='line'><span class="n">customView</span>    <span class="o">|&lt;-</span><span class="n">reducedWidth</span><span class="o">--&gt;|</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在此次深挖之前，贝聊客户端的开发小哥们由于项目工期紧以及适配 iOS 11 工作量大，暂时是通过设置 <code>UIButton</code> 的 <code>setContentEdgeInsets:</code> 来实现的，这在当时看来是以最小的改动完成了适配，直到 iOS 11.2 这个版本的推出，我们发现当侧滑返回时，导航条的返回按钮会被切掉一点角。（这个方法还有个小缺点是点击区域太小了）</p>
+
+<p><img src="https://user-images.githubusercontent.com/5633917/34596594-044690be-f21c-11e7-8000-e045dd1f0822.png" alt="img1" /></p>
+
+<p>碰巧的是，我的 leader 恰好发现了钉钉也有类似的问题。</p>
+
+<p><img src="https://user-images.githubusercontent.com/5633917/34637834-7982edb8-f2f9-11e7-84f5-9fef5306e910.JPG" alt="" /></p>
+
+<p>iOS 11 虽然已经推出好几个月了，这个问题可能还在困扰着部分同行，接下来就讲讲贝聊是如何解决这个问题的。</p>
+
+<p>由于大家知道 fixed space 失效是系统换成了 auto layout 来实现，所以网上的大部分文章也都是修改 constraint。遗憾的是，我谷歌到挺多使用这种方式去修改要获取到 <code>UINavigationBar</code> 的私有子 view，譬如 <code>contentView</code> 或 <code>barStackView</code>，再为私有子 view 添加 leading 和 trailing 的约束等。</p>
+
+<p>我并没有尝试这种方法的可行性，因为始终觉得获取私有子 view 的做法比较脆弱，苹果一旦更换实现，程序的健壮性不好保障。但可以确定的是，解决这个问题的思路大致是修改约束，设法摆脱 stackView 的限制。</p>
+
+<p>在 auto layout 中，约束是使用 alignment rectangle 来确定视图的大小和位置。先看看 alignment rectangle 的作用是怎样，下图摘自《iOS Auto Layout Demystified》：</p>
+
+<p><img src="https://user-images.githubusercontent.com/5633917/34598265-97cfd8e0-f226-11e7-886f-3d0d2f0d79ce.jpeg" alt="img2" /></p>
+
+<p><img src="https://user-images.githubusercontent.com/5633917/34598273-b0486090-f226-11e7-998a-9d695a1f4bbc.jpeg" alt="img3" /></p>
+
+<p>书中对此的说明是，假如设计师给了你张带角标的气泡图片，程序只期望对气泡进行居中，而图片的 frame 却包含了角标部分，这时可以 override <code>alignmentRectForFrame:</code>、<code>frameForAlignmentRect</code>。<code>UIView</code> 也给出了相对简便的属性 <code>alignmentRectInsets</code>，需要注意的是，一旦设置了 <code>alignmentRectInsets</code>，view 的 frame 就会根据 alignment rectangle 和 <code>alignmentRectInsets</code> 计算出来。</p>
+
+<p>有了以上的概念后，贝聊的修复方法是子类化一个 UIBarButtonItem 的 customView：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">@interface</span> <span class="nc">BLNavigationItemCustomView</span>: <span class="nc">UIView</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">)</span> <span class="n">UIEdgeInsets</span> <span class="n">alignmentRectInsetsOverride</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@implementation</span> <span class="nc">BLNavigationItemCustomView</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">-</span> <span class="p">(</span><span class="n">UIEdgeInsets</span><span class="p">)</span><span class="nf">alignmentRectInsets</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">UIEdgeInsetsEqualToEdgeInsets</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">alignmentRectInsetsOverride</span><span class="p">,</span> <span class="n">UIEdgeInsetsZero</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">super</span><span class="p">.</span><span class="n">alignmentRectInsets</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">alignmentRectInsetsOverride</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再就是创建 customView 时针对 iOS 11 做特殊处理，以返回按钮为例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">if</span> <span class="p">(@</span><span class="n">available</span><span class="p">(</span><span class="n">iOS</span> <span class="mf">11.0</span><span class="p">,</span> <span class="o">*</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">button</span><span class="p">.</span><span class="n">alignmentRectInsetsOverride</span> <span class="o">=</span> <span class="n">UIEdgeInsetsMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">offset</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">button</span><span class="p">.</span><span class="n">translatesAutoresizingMaskIntoConstraints</span> <span class="o">=</span> <span class="nb">NO</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">button</span><span class="p">.</span><span class="n">widthAnchor</span> <span class="n">constraintEqualToConstant</span><span class="o">:</span><span class="n">buttonWidth</span><span class="p">].</span><span class="n">active</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">[</span><span class="n">button</span><span class="p">.</span><span class="n">heightAnchor</span> <span class="n">constraintEqualToConstant</span><span class="o">:</span><span class="mi">44</span><span class="p">].</span><span class="n">active</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之所以设置 widthAnchor、heightAnchor 是前文提到的需要对 <code>UIBarButtonItem</code> 子 view 设置约束，我在实现时就遇到了怎么修改 frame 都无法撑大 customView 的情况，后来发现是没设置 widthAnchor。我们接着用 View Debug 来看看实现的效果：</p>
+
+<p><img src="https://user-images.githubusercontent.com/5633917/34602108-8b91454c-f239-11e7-9677-9c8434ec0d8a.jpeg" alt="img4" /></p>
+
+<p>这儿有个问题就是 customView 有小部分超出了 stackView 的 bounds，导致了超出部分无法接收点击。有趣的是，使用 iOS 11 之前 fixed space 添加间距的做法可以减少 stackView 的 margin。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="n">UIBarButtonItem</span> <span class="o">*</span><span class="n">spacer</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIBarButtonItem</span> <span class="n">bl_barButtonItemSpacerWithWidth</span><span class="o">:-</span><span class="p">(</span><span class="n">offset</span><span class="p">)];</span>
+</span><span class='line'><span class="n">self</span><span class="p">.</span><span class="n">navigationItem</span><span class="p">.</span><span class="n">leftBarButtonItems</span> <span class="o">=</span> <span class="p">@[</span><span class="n">spacer</span><span class="p">,</span> <span class="n">barButtonItem</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>结合上 fixed space 和 alignmentRectInsets，customView 将不再超出它的父视图：</p>
+
+<p><img src="https://user-images.githubusercontent.com/5633917/34602516-04f734b8-f23b-11e7-809a-5574dc5f6b3e.jpeg" alt="img5" /></p>
+
+<p>总之，我们需继承复写 <code> alignmentRectInsets</code> 的 <code>BLNavigationItemCustomView </code>，然后继续保持之前版本 fixed space 的处理，只针对 iOS 11 为 customView 新增约束，就可使间距问题在新旧系统得以解决。</p>
+
+<h3>总结</h3>
+
+<p>不客气的说，iOS 11 真的是一个挺难适配的版本，期间我都差点放弃对导航条间隔的适配了，好在最后还是顺利解决了。如果你有更好的方式解决，欢迎赐教。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[如何实现一个 AttributedLabel]]></title>
