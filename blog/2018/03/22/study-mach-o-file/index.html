@@ -372,10 +372,13 @@ const uintptr_t instructionAddress = bs_mach_instructionAddress(&amp;machineCont
 
 <p>如上图，一个函数调用栈是由若干个栈帧组成，每个栈帧通过 FP 和 SP 划分界线，fun1 函数 SP 和 FP 的指向就是 main 函数的栈帧。所以说只要知道当前函数的栈帧就能获取上一个函数的栈帧，从而回溯出函数调用栈。</p>
 
-<p>程序计数器（PC）作用是给出将要执行的下一条指令在内存中的地址，上面代码的 <code>BS_INSTRUCTION_ADDRESS</code>。其中 16 位为 %ip，32 位为 %eip，64 位为 %rip，arm 是 pc。
-SP 是栈指针寄存器，指向栈顶。
-FP 是栈基址寄存器，指向栈起始位置。
-LR 寄存器在子程序调用时会存储 PC 的值，即返回值。</p>
+<p>程序计数器（PC）作用是给出将要执行的下一条指令在内存中的地址，上面代码的 <code>BS_INSTRUCTION_ADDRESS</code>。其中 16 位为 %ip，32 位为 %eip，64 位为 %rip，arm 是 pc。</p>
+
+<p>SP 是栈指针寄存器，指向栈顶。</p>
+
+<p>FP 是栈基址寄存器，指向栈起始位置。</p>
+
+<p>LR 寄存器在子程序调用时会存储 PC 的值，即返回值。</p>
 
 <p>为了方便获取栈帧，干脆构造一个栈帧的结构体，以下代码来自 KSCrash，它的注释已经很好的讲明了结构体的原由，BSBacktraceLogger 与之类似。</p>
 
