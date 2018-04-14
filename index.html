@@ -9,7 +9,7 @@
 	<meta name="author" content="Hawk0620">
 
 	
-	<meta name="description" content="Mar 22nd, 2018 探秘 Mach-O 文件 之前负责项目的包体积优化学习了 Mach-O 文件的格式，那么 Mach-O 究竟是怎么样的文件，知道它的组成之后我们又能做点什么？本文会从 Mach-O 文件的介绍讲起，再看看认识它后的一些实际应用。 阅读更多 &rarr; Jan &hellip;">
+	<meta name="description" content="Apr 14th, 2018 RunLoop 源码学习笔记 RunLoop 是个老生常谈的话题了，一直以来对 RunLoop 的认识还停留在 深入理解RunLoop（ YY 大神） 等业内好文当中，对于自个来说仍有些知识盲区： 网上有文章用伪代码提到 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -91,6 +91,46 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-04-14T15:54:22+08:00" data-updated="true" itemprop="datePublished">Apr 14<sup>th</sup>, 2018</time></div>
+		<div class="tags">
+
+</div>
+		
+	</div>
+	<h1 class="title" itemprop="name"><a href="/blog/2018/04/14/runloop-study-note/" itemprop="url">RunLoop 源码学习笔记</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>RunLoop 是个老生常谈的话题了，一直以来对 RunLoop 的认识还停留在 <a href="https://blog.ibireme.com/2015/05/18/runloop/">深入理解RunLoop</a>（ YY 大神） 等业内好文当中，对于自个来说仍有些知识盲区：</p>
+
+<ul>
+<li>网上有文章用伪代码提到 <code>CheckIfExistMessagesInMainDispatchQueue();</code> ，代码看似提供了一次执行 main queue 的机会，为什么有这样的设计？</li>
+<li>怎么理解在 kCFRunLoopBeforeSources 和 kCFRunLoopAfterWaiting 之间来检测是否卡顿？</li>
+<li>我们能在代码中看到 <code>USE_DISPATCH_SOURCE_FOR_TIMERS</code> 这样的宏，到底 GCD 的 timer 与 RunLoop 有关吗？</li>
+<li>能让 RunLoop 退出的几种方式</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2018/04/14/runloop-study-note/" class="more-link">阅读更多 &rarr;</a>
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
